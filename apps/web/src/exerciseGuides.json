@@ -1,0 +1,310 @@
+[
+  {
+    "english": "Incline Pronated DB Bench Press",
+    "ru": "Жим гантелей на наклонной скамье",
+    "source": "Incline_Dumbbell_Press",
+    "cue": "Ляг на наклонную скамью, поставь стопы на пол. Выжми гантели вверх и плавно опусти к груди.",
+    "note": "",
+    "images": [
+      "Incline_Dumbbell_Press-0.jpg",
+      "Incline_Dumbbell_Press-1.jpg"
+    ]
+  },
+  {
+    "english": "Flat Pronated DB Bench Press",
+    "ru": "Жим гантелей лёжа",
+    "source": "Dumbbell_Bench_Press",
+    "cue": "Ляг на горизонтальную скамью, устойчиво поставь стопы. Выжми гантели над грудью и опусти под контролем.",
+    "note": "",
+    "images": [
+      "Dumbbell_Bench_Press-0.jpg",
+      "Dumbbell_Bench_Press-1.jpg"
+    ]
+  },
+  {
+    "english": "Hammer Strength Decline Chest Press",
+    "ru": "Жим на нижнюю часть груди в Hammer Strength",
+    "source": "Leverage_Decline_Chest_Press",
+    "cue": "Прижми спину к опоре и возьми рукояти. Выжми их вперёд, затем плавно верни.",
+    "note": "На фото рычажный тренажёр: его конструкция может отличаться от твоего Hammer Strength.",
+    "images": [
+      "Leverage_Decline_Chest_Press-0.jpg",
+      "Leverage_Decline_Chest_Press-1.jpg"
+    ]
+  },
+  {
+    "english": "Pec Deck",
+    "ru": "Сведение рук в тренажёре «бабочка»",
+    "source": "Butterfly",
+    "cue": "Прижми спину к опоре. Сведи руки перед грудью и плавно разведи, сохраняя контроль.",
+    "note": "Положение рук зависит от конструкции тренажёра.",
+    "images": [
+      "Butterfly-0.jpg",
+      "Butterfly-1.jpg"
+    ]
+  },
+  {
+    "english": "Push Ups",
+    "ru": "Отжимания от пола",
+    "source": "Pushups",
+    "cue": "Упрись ладонями в пол, удерживай тело прямым. Опусти грудь к полу и оттолкнись вверх.",
+    "note": "",
+    "images": [
+      "Pushups-0.jpg",
+      "Pushups-1.jpg"
+    ]
+  },
+  {
+    "english": "Lat Pulldown Lean Away Medium …",
+    "ru": "Тяга верхнего блока с небольшим отклонением",
+    "source": "Wide-Grip_Lat_Pulldown",
+    "cue": "Зафиксируй бёдра под валиками. Тяни рукоять к верхней части груди, затем плавно выпрями руки без раскачки.",
+    "note": "На фото широкий хват. В исходной программе указан средний хват, полное название обрезано: точный вариант уточни.",
+    "images": [
+      "Wide-Grip_Lat_Pulldown-0.jpg",
+      "Wide-Grip_Lat_Pulldown-1.jpg"
+    ]
+  },
+  {
+    "english": "Hammer Strength Overhand Row",
+    "ru": "Тяга в Hammer Strength хватом сверху",
+    "source": "Leverage_Iso_Row",
+    "cue": "Упрись грудью в подушку. Тяни рукояти к корпусу и плавно возвращай, не отрывая грудь от опоры.",
+    "note": "Фото показывает похожую рычажную тягу; рукояти и хват могут отличаться.",
+    "images": [
+      "Leverage_Iso_Row-0.jpg",
+      "Leverage_Iso_Row-1.jpg"
+    ]
+  },
+  {
+    "english": "Chest Supported Incline Neut…",
+    "ru": "Тяга гантелей с упором грудью, нейтральный хват",
+    "source": "Dumbbell_Incline_Row",
+    "cue": "Ляг грудью на наклонную скамью, ладони обращены друг к другу. Подтяни гантели к бокам корпуса и опусти.",
+    "note": "В источнике название обрезано; показан вариант тяги с опорой грудью.",
+    "images": [
+      "Dumbbell_Incline_Row-0.jpg",
+      "Dumbbell_Incline_Row-1.jpg"
+    ]
+  },
+  {
+    "english": "DB Pullover",
+    "ru": "Пуловер с гантелью",
+    "source": "Bent-Arm_Dumbbell_Pullover",
+    "cue": "Держи гантель двумя руками над грудью. Слегка согни локти, плавно уведи гантель за голову и верни.",
+    "note": "На фото опора поперёк скамьи. В твоём источнике положение на скамье может отличаться.",
+    "images": [
+      "Bent-Arm_Dumbbell_Pullover-0.jpg",
+      "Bent-Arm_Dumbbell_Pullover-1.jpg"
+    ]
+  },
+  {
+    "english": "Seated Rear Delt Flys",
+    "ru": "Разведения гантелей в наклоне сидя",
+    "source": "Seated_Bent-Over_Rear_Delt_Raise",
+    "cue": "Сядь и наклони корпус вперёд. Разведи слегка согнутые руки в стороны, затем опусти без рывка.",
+    "note": "",
+    "images": [
+      "Seated_Bent-Over_Rear_Delt_Raise-0.jpg",
+      "Seated_Bent-Over_Rear_Delt_Raise-1.jpg"
+    ]
+  },
+  {
+    "english": "Barbell Deadlift",
+    "ru": "Становая тяга со штангой",
+    "source": "Barbell_Deadlift",
+    "cue": "Подойди к грифу, отведи таз назад и возьмись за штангу. Встань, держа гриф близко к ногам; опусти с контролем.",
+    "note": "",
+    "images": [
+      "Barbell_Deadlift-0.jpg",
+      "Barbell_Deadlift-1.jpg"
+    ]
+  },
+  {
+    "english": "Cybex Medium Stance Leg Press",
+    "ru": "Жим ногами в Cybex, средняя постановка",
+    "source": "Leg_Press",
+    "cue": "Прижми таз и спину к опоре, поставь стопы на платформу. Согни колени в доступной амплитуде, затем выжми платформу.",
+    "note": "Показан обычный жим ногами: конструкция и настройки Cybex могут отличаться.",
+    "images": [
+      "Leg_Press-0.jpg",
+      "Leg_Press-1.jpg"
+    ]
+  },
+  {
+    "english": "DB Walking Lunges",
+    "ru": "Выпады с гантелями в ходьбе",
+    "source": "Dumbbell_Lunges",
+    "cue": "Держи гантели по бокам. Шагни вперёд, опустись в выпад и поднимись, затем сделай шаг другой ногой.",
+    "note": "На фото выпад на месте; в программе — последовательные шаги вперёд.",
+    "images": [
+      "Dumbbell_Lunges-0.jpg",
+      "Dumbbell_Lunges-1.jpg"
+    ]
+  },
+  {
+    "english": "Lying Leg Curl - Neutral (Dorsi…",
+    "ru": "Сгибание ног лёжа в тренажёре",
+    "source": "Lying_Leg_Curls",
+    "cue": "Ляг на живот, размести валик над пятками. Согни колени, приблизив пятки к ягодицам, затем плавно разогни.",
+    "note": "Название в источнике обрезано: точное положение стоп не подтверждено.",
+    "images": [
+      "Lying_Leg_Curls-0.jpg",
+      "Lying_Leg_Curls-1.jpg"
+    ]
+  },
+  {
+    "english": "DB RDL",
+    "ru": "Румынская тяга с гантелями",
+    "source": "Stiff-Legged_Dumbbell_Deadlift",
+    "cue": "Слегка согни колени и отводи таз назад, опуская гантели вдоль ног. Вернись в стойку, разгибая таз.",
+    "note": "На фото близкий вариант тяги на почти прямых ногах. В румынской тяге колени слегка согнуты; касаться пола не требуется.",
+    "images": [
+      "Stiff-Legged_Dumbbell_Deadlift-0.jpg",
+      "Stiff-Legged_Dumbbell_Deadlift-1.jpg"
+    ]
+  },
+  {
+    "english": "Standing Calf Raise Machine Me…",
+    "ru": "Подъём на носки стоя в тренажёре",
+    "source": "Standing_Calf_Raises",
+    "cue": "Поставь переднюю часть стоп на платформу. Поднимись на носки и плавно опусти пятки, удерживая корпус устойчиво.",
+    "note": "Название в источнике обрезано; точная постановка стоп не подтверждена.",
+    "images": [
+      "Standing_Calf_Raises-0.jpg",
+      "Standing_Calf_Raises-1.jpg"
+    ]
+  },
+  {
+    "english": "Flat Bench DB Skull Crushers",
+    "ru": "Французский жим с гантелями лёжа",
+    "source": "Lying_Dumbbell_Tricep_Extension",
+    "cue": "Ляг на скамью и подними гантели. Сгибая локти, опусти гантели по сторонам головы, затем разогни руки.",
+    "note": "",
+    "images": [
+      "Lying_Dumbbell_Tricep_Extension-0.jpg",
+      "Lying_Dumbbell_Tricep_Extension-1.jpg"
+    ]
+  },
+  {
+    "english": "Incline Supinated DB Curls",
+    "ru": "Сгибание рук с гантелями на наклонной скамье",
+    "source": "Incline_Dumbbell_Curl",
+    "cue": "Сядь с опорой спины, руки опусти, ладони направь вперёд. Согни локти и плавно опусти гантели.",
+    "note": "",
+    "images": [
+      "Incline_Dumbbell_Curl-0.jpg",
+      "Incline_Dumbbell_Curl-1.jpg"
+    ]
+  },
+  {
+    "english": "Cable Rope French Press",
+    "ru": "Разгибание рук с канатом из-за головы",
+    "source": "Cable_Rope_Overhead_Triceps_Extension",
+    "cue": "Встань спиной к блоку, держи канат за головой. Разогни локти, затем верни руки, сохраняя корпус устойчивым.",
+    "note": "",
+    "images": [
+      "Cable_Rope_Overhead_Triceps_Extension-0.jpg",
+      "Cable_Rope_Overhead_Triceps_Extension-1.jpg"
+    ]
+  },
+  {
+    "english": "Cable Rope Tricep Pushdowns",
+    "ru": "Разгибание рук с канатом вниз",
+    "source": "Triceps_Pushdown_-_Rope_Attachment",
+    "cue": "Возьми канат верхнего блока, локти держи у корпуса. Разогни руки вниз, затем плавно согни.",
+    "note": "",
+    "images": [
+      "Triceps_Pushdown_-_Rope_Attachment-0.jpg",
+      "Triceps_Pushdown_-_Rope_Attachment-1.jpg"
+    ]
+  },
+  {
+    "english": "Standing DB Hammer Curls",
+    "ru": "Сгибание рук «молоток» стоя",
+    "source": "Hammer_Curls",
+    "cue": "Держи гантели по бокам, ладонями к корпусу. Согни локти без раскачки и плавно опусти гантели.",
+    "note": "",
+    "images": [
+      "Hammer_Curls-0.jpg",
+      "Hammer_Curls-1.jpg"
+    ]
+  },
+  {
+    "english": "Cable Rope Hammer Curl",
+    "ru": "Сгибание рук «молоток» с канатом",
+    "source": "Cable_Hammer_Curls_-_Rope_Attachment",
+    "cue": "Возьми канат нижнего блока ладонями друг к другу. Согни локти и плавно опусти рукоять.",
+    "note": "",
+    "images": [
+      "Cable_Hammer_Curls_-_Rope_Attachment-0.jpg",
+      "Cable_Hammer_Curls_-_Rope_Attachment-1.jpg"
+    ]
+  },
+  {
+    "english": "High Pulley Rope Cable Crunch",
+    "ru": "Скручивания стоя с канатом верхнего блока",
+    "source": "Standing_Rope_Crunch",
+    "cue": "Держи канат около головы. Сократи мышцы живота, округляя верх корпуса, затем плавно вернись.",
+    "note": "",
+    "images": [
+      "Standing_Rope_Crunch-0.jpg",
+      "Standing_Rope_Crunch-1.jpg"
+    ]
+  },
+  {
+    "english": "Seated DB Shoulder Press",
+    "ru": "Жим гантелей сидя",
+    "source": "Dumbbell_Shoulder_Press",
+    "cue": "Сядь с опорой спины, держи гантели у плеч. Выжми их вверх и плавно опусти.",
+    "note": "",
+    "images": [
+      "Dumbbell_Shoulder_Press-0.jpg",
+      "Dumbbell_Shoulder_Press-1.jpg"
+    ]
+  },
+  {
+    "english": "Cable Rope Upright Row",
+    "ru": "Тяга каната к подбородку",
+    "source": "Upright_Cable_Row",
+    "cue": "Возьми канат нижнего блока. Подними локти в стороны, ведя рукоять вдоль корпуса, затем опусти без рывка.",
+    "note": "На фото прямая рукоять; в твоей программе используется канат. Высоту подъёма выбирай по комфортной амплитуде.",
+    "images": [
+      "Upright_Cable_Row-0.jpg",
+      "Upright_Cable_Row-1.jpg"
+    ]
+  },
+  {
+    "english": "Standing DB Side Lateral Raises",
+    "ru": "Подъём гантелей через стороны стоя",
+    "source": "Side_Lateral_Raise",
+    "cue": "Слегка согни локти. Подними гантели через стороны примерно до уровня плеч, затем плавно опусти.",
+    "note": "",
+    "images": [
+      "Side_Lateral_Raise-0.jpg",
+      "Side_Lateral_Raise-1.jpg"
+    ]
+  },
+  {
+    "english": "Cable Rope Face Pulls",
+    "ru": "Тяга каната к лицу",
+    "source": "Face_Pull",
+    "cue": "Возьми канат примерно на уровне лица. Тяни его к лицу, разводя локти и кисти, затем плавно выпрями руки.",
+    "note": "",
+    "images": [
+      "Face_Pull-0.jpg",
+      "Face_Pull-1.jpg"
+    ]
+  },
+  {
+    "english": "Band Pull Aparts",
+    "ru": "Разведение рук с резинкой",
+    "source": "Band_Pull_Apart",
+    "cue": "Держи резинку перед грудью. Разведи руки в стороны, растягивая её, затем плавно верни.",
+    "note": "",
+    "images": [
+      "Band_Pull_Apart-0.jpg",
+      "Band_Pull_Apart-1.jpg"
+    ]
+  }
+]

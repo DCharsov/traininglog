@@ -1,0 +1,15 @@
+node_modules/
+dist/
+test-results/
+test-results-*/
+playwright-report/
+*.local
+.DS_Store
+deploy/
+bin/
+obj/
+**/data/
+.secrets/
+
+# Снимки экрана и черновики агентов
+Claude outputs/

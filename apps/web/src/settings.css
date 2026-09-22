@@ -1,0 +1,23 @@
+.settings-screen [hidden]{display:none!important}
+.settings-back{margin:0 0 12px;background:transparent;padding-left:0;color:var(--muted)}
+.settings-menu{display:grid;gap:8px}
+.settings-menu>button{display:grid;gap:4px;text-align:left;justify-content:stretch;padding:16px;min-width:0}
+.settings-menu>button span{font-size:.8125rem;color:var(--muted);font-weight:400}
+.settings-screen form{display:grid;gap:12px;margin:12px 0 20px}
+.settings-screen .manage-row{overflow-wrap:anywhere}
+.settings-screen .actions>button{white-space:normal;overflow-wrap:anywhere}
+.sync-status{width:100%;display:grid;justify-content:start;text-align:left;gap:2px;padding:8px 12px;margin:0 0 12px;min-height:48px;font-size:.75rem;background:transparent;color:var(--muted);border:1px solid var(--line)}
+.sync-status span{color:var(--accent)}
+.sync-status small{font-size:.75rem;overflow-wrap:anywhere}
+.sync-status.needs-attention{border-color:var(--danger)}
+.sync-panel>button{margin-bottom:8px;max-width:100%;white-space:normal}
+.sync-panel form{display:grid;gap:12px;margin:12px 0}
+.sync-panel>p,.conflict-card{overflow-wrap:anywhere}
+.conflict-card{border:1px solid var(--line);border-radius:12px;padding:12px;margin:12px 0}
+.conflict-differences{margin:12px 0}
+.conflict-differences>div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;border-top:1px solid var(--line);padding:12px 0}
+.conflict-differences dt{grid-column:1/-1;font-size:.875rem;font-weight:600}
+.conflict-differences dd{margin:0;font-size:.875rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.conflict-differences dd span{display:block;font-size:.75rem;color:var(--muted);margin-bottom:4px}
+.field-error{color:var(--danger);font-size:.8125rem}
+@media(min-width:560px){.settings-menu{grid-template-columns:repeat(2,minmax(0,1fr))}}

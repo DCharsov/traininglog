@@ -1,0 +1,70 @@
+.app:has(.workout-focus) nav{display:none}
+.app:has(.workout-focus) main{max-width:680px;padding:0 12px max(24px,env(safe-area-inset-bottom));width:100%;margin:0 auto}
+.workout-focus{min-width:0}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.workout-focus-header{position:sticky;top:0;z-index:12;background:var(--bg);padding:calc(8px + env(safe-area-inset-top)) 0 10px;margin-bottom:12px}
+.focus-title{display:flex;align-items:center;gap:8px}
+.focus-title h1{flex:1;min-width:0;font-size:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.focus-title .collapse-workout{font-size:.8125rem;padding:8px;min-height:44px;flex-shrink:0}
+.focus-navigation{display:flex;align-items:center;gap:4px;margin:4px 0}
+.workout-overview-button{flex:1;min-width:0;text-align:left;background:var(--surface-2);gap:8px;padding:8px;font-size:.8125rem}
+.workout-overview-button span{min-width:0}
+.workout-overview-button small{display:block;font-size:.6875rem;font-weight:400;color:var(--muted);white-space:normal}
+.focus-exercise{padding:12px}
+.focus-exercise .exercise-head h2{font-size:1.125rem}
+.focus-exercise .exercise-meta{font-size:.75rem;margin-bottom:6px}
+.focus-exercise-tools{display:flex;gap:6px;flex-wrap:wrap}
+.focus-exercise-tools .ghost{font-size:.75rem;min-height:44px;padding:6px 8px}
+.focus-exercise-tools .equipment-required{color:var(--accent);border:1px solid var(--accent)}
+.focus-exercise .set-wrap.current{margin:4px -4px;padding:10px}
+
+.focus-exercise .set-field-label{display:grid;gap:3px;font-size:.75rem;color:var(--muted)}
+.focus-exercise .stepper{color:var(--text)}
+.focus-exercise .set-source{font-size:.75rem;color:var(--accent)}
+.focus-exercise .previous{font-size:.75rem;margin:4px 0}
+.focus-exercise .previous span{display:inline-block}
+.set-position{font-size:.9375rem;font-weight:600}
+.focus-next{display:flex;align-items:center;gap:8px;margin:12px 0;font-size:.75rem;color:var(--muted)}
+.focus-next>span{flex:1;min-width:0}
+.focus-next strong{display:block;color:var(--text);font-size:.8125rem;overflow-wrap:anywhere}
+.focus-next button{font-size:.75rem;max-width:45%;padding:8px}
+.workout-complete{padding:16px;text-align:center;color:var(--accent)}
+.workout-complete p{font-size:.8125rem;margin-bottom:0}
+.workout-focus .repeat-set{font-size:.8125rem;padding:8px;min-height:44px}
+.workout-focus .set-error{margin:0;padding:8px;background:#3a2019;border-radius:8px;font-size:.875rem}
+.workout-focus input[aria-invalid=true],.workout-focus select[aria-invalid=true]{outline:2px solid var(--danger)}
+.workout-focus .go{position:static;box-shadow:0 5px 12px #0006}
+.workout-focus .pad{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.pad .pad-clear{grid-column:1/-1;font-size:.8125rem;height:44px}
+.pad .pad-footer{grid-column:1/-1;display:flex;gap:6px}
+.pad .pad-footer button{flex:1;min-width:0;height:44px;font-size:.75rem;padding:6px}
+.workout-rest .timer{position:static;width:100%;margin:0 0 12px;display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px;padding:10px}
+.workout-rest .timer svg{width:52px;height:52px}
+.workout-rest .timer strong{font-size:1.5rem}
+.workout-rest .timer .timer-actions{grid-column:1/-1;display:flex;justify-content:stretch}
+.workout-rest .timer .timer-actions button{flex:1;padding:8px;min-height:44px}
+.workout-rest .timer.over strong{font-size:1.0625rem}
+.workout-overview{display:grid;gap:18px}
+.workout-overview h3{font-size:.9375rem;margin:0 0 6px}
+.workout-overview .overview-set{width:100%;justify-content:space-between;gap:10px;margin:4px 0;padding:10px;text-align:left;font-size:.8125rem;min-height:52px}
+.overview-set>span:first-child{min-width:0;overflow-wrap:anywhere}
+.overview-set>span:last-child{font-size:.6875rem;flex-shrink:0;color:var(--muted)}
+.overview-set small{display:block;font-size:.75rem;color:var(--muted)}
+.overview-set[aria-current=step]{outline:2px solid var(--accent);outline-offset:-2px}
+.overview-set.completed>span:last-child{color:var(--accent)}
+.overview-set.skipped{opacity:.7}
+.focus-guide .exercise-guide>summary{display:none}
+.workout-history .set-done{flex-wrap:wrap}
+.workout-history .set-done .ghost{font-size:.75rem}
+.workout-history .set-note{display:block;color:var(--muted);margin-left:34px}
+@media(min-width:600px){.workout-rest .timer{grid-template-columns:52px minmax(0,1fr) auto}.workout-rest .timer .timer-actions{grid-column:auto}.workout-rest .timer .timer-actions button{flex:auto}}
+@media(min-width:1000px){.app:has(.workout-focus){display:block;max-width:100%}.app:has(.workout-focus) main{padding-top:8px}}
+/* Ввод под большим пальцем: «Готово» и панель держатся у нижнего края экрана */
+.workout-focus .set-submit{position:sticky;bottom:calc(6px + env(safe-area-inset-bottom));z-index:11;display:grid;gap:6px;margin:8px -6px 0;padding:6px;border-radius:14px;background:#1a2230f2;backdrop-filter:blur(8px)}
+.workout-focus.pad-open .set-submit{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:680px;border-radius:18px 18px 0 0;background:#151c26f7;box-shadow:0 -12px 30px #000a;
+ padding:8px max(10px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-right))}
+.app:has(.workout-focus.pad-open) main{padding-bottom:calc(var(--set-submit-height,340px) + 24px)}
+@media(max-height:500px){.workout-focus-header{position:static}.workout-focus .go{position:static}
+ .workout-focus .set-submit,.workout-focus.pad-open .set-submit{position:static;margin:8px 0 0;padding:0;background:none;box-shadow:none;backdrop-filter:none;max-width:none}
+ .app:has(.workout-focus.pad-open) main{padding-bottom:max(24px,env(safe-area-inset-bottom))}}
+.tag.record{display:inline-flex;align-items:center;padding:3px 7px;background:#c4f16b1f;color:var(--accent);flex-shrink:0}

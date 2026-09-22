@@ -1,0 +1,1 @@
+{"name":"traininglog-api-contract","private":true,"type":"module","scripts":{"generate":"openapi-typescript ../../apps/api/openapi.json -o ../../apps/web/src/api.generated.ts"},"devDependencies":{"openapi-typescript":"7.13.0","typescript":"5.9.3"}}
