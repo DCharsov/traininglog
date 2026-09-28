@@ -6,6 +6,7 @@ import SeedPrograms from './SeedPrograms'
 import { downloadCsv } from './progress'
 import ManageData from './ManageData'
 import SyncPanel from './SyncPanel'
+import WatchSettings from './WatchSettings'
 import type { SyncController } from './useSyncController'
 import './settings.css'
 
@@ -33,7 +34,7 @@ export default function SettingsScreen({ disabled, programs, program, sync, run,
   {section ? <button className="settings-back" onClick={() => select(null)}>← Все настройки</button> : <section className="card">
    <h2>Настройки</h2><div className="settings-menu">{sections.map(item => <button key={item.id} aria-label={item.name} onClick={() => select(item.id)}><strong>{item.name}</strong><span>{item.detail}</span></button>)}</div>
   </section>}
-  <div hidden={section !== 'sync'}><SyncPanel controller={sync} expanded /></div>
+  <div hidden={section !== 'sync'}><SyncPanel controller={sync} expanded /><WatchSettings disabled={disabled} run={run} ask={ask}/></div>
   <section className="card" hidden={section !== 'programs'}><h2>Готовые программы</h2><SeedPrograms disabled={disabled} programs={programs} program={program} run={run} onSelectProgram={onSelectProgram} refresh={refresh} /></section>
   <div hidden={!manageSection}><ManageData disabled={disabled} run={run} ask={ask} section={manageSection ?? 'equipment'} /></div>
   <section className="card" hidden={section !== 'backup'}>

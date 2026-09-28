@@ -20,6 +20,11 @@
         "type": "apiKey",
         "in": "cookie",
         "name": "TrainingLog.Auth"
+      },
+      "watchBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Scoped device token. Cookie authentication is not accepted on watch/v1."
       }
     },
     "schemas": {
@@ -1533,6 +1538,10 @@
           },
           "generation": {
             "type": "string"
+          },
+          "watchProtocolVersion": {
+            "type": "integer",
+            "const": 1
           }
         },
         "required": [
@@ -1757,6 +1766,329 @@
           "items",
           "cursor",
           "hasMore"
+        ]
+      },
+      "WatchControl": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "phone",
+              "offered",
+              "watch"
+            ]
+          },
+          "deviceId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "controlEpoch": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "handoffId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "state",
+          "deviceId",
+          "controlEpoch",
+          "handoffId"
+        ]
+      },
+      "WatchSnapshot": {
+        "type": "object",
+        "properties": {
+          "protocolVersion": {
+            "const": 1,
+            "type": "integer"
+          },
+          "contractVersion": {
+            "const": 2,
+            "type": "integer"
+          },
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "generation": {
+            "type": "string"
+          },
+          "control": {
+            "$ref": "#/components/schemas/WatchControl"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/Session"
+          }
+        },
+        "required": [
+          "protocolVersion",
+          "contractVersion",
+          "sessionId",
+          "version",
+          "generation",
+          "control",
+          "payload"
+        ]
+      },
+      "WatchCommand": {
+        "type": "object",
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "generation": {
+            "type": "string"
+          },
+          "baseVersion": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "controlEpoch": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "deviceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "handoffId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "operationId",
+          "generation",
+          "baseVersion",
+          "controlEpoch",
+          "sessionId"
+        ]
+      },
+      "WatchWrite": {
+        "type": "object",
+        "properties": {
+          "protocolVersion": {
+            "type": "integer",
+            "const": 1
+          },
+          "contractVersion": {
+            "type": "integer",
+            "const": 2
+          },
+          "operationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "generation": {
+            "type": "string"
+          },
+          "baseVersion": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "controlEpoch": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "payload": {
+            "$ref": "#/components/schemas/Session"
+          }
+        },
+        "required": [
+          "protocolVersion",
+          "contractVersion",
+          "operationId",
+          "generation",
+          "baseVersion",
+          "controlEpoch",
+          "payload"
+        ]
+      },
+      "WatchWriteResponse": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "generation": {
+            "type": "string"
+          },
+          "control": {
+            "$ref": "#/components/schemas/WatchControl"
+          }
+        },
+        "required": [
+          "version",
+          "generation",
+          "control"
+        ]
+      },
+      "WatchPairing": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[0-9]{8}$"
+          },
+          "expiresAt": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "code",
+          "expiresAt"
+        ]
+      },
+      "WatchRedeem": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[0-9]{8}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ]
+      },
+      "WatchCredentials": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "token": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "protocolVersion": {
+            "type": "integer",
+            "const": 1
+          },
+          "contractVersion": {
+            "type": "integer",
+            "const": 2
+          }
+        },
+        "required": [
+          "deviceId",
+          "token",
+          "expiresAt",
+          "protocolVersion",
+          "contractVersion"
+        ]
+      },
+      "WatchDevice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "revokedAt": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "lastSeenAt": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "expiresAt",
+          "revokedAt",
+          "lastSeenAt"
+        ]
+      },
+      "WatchRecoveryWrite": {
+        "type": "object",
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "payload": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "operationId",
+          "sessionId",
+          "payload"
+        ]
+      },
+      "WatchRecovery": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "deviceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "id",
+          "sessionId",
+          "deviceId",
+          "createdAt"
         ]
       }
     }
@@ -2993,6 +3325,960 @@
                 "$ref": "#/components/schemas/WriteRequest"
               }
             }
+          }
+        }
+      }
+    },
+    "/watch/pairing": {
+      "post": {
+        "tags": [
+          "Apple Watch"
+        ],
+        "security": [
+          {
+            "ownerCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-CSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchPairing"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "401": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "409": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "423": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "426": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "429": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "503": {
+            "description": "New watch pairing or handoff is disabled; existing control remains enforced."
+          }
+        }
+      }
+    },
+    "/watch/pairing/redeem": {
+      "post": {
+        "tags": [
+          "Apple Watch"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchRedeem"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchCredentials"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "401": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "409": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "423": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "426": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "429": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "503": {
+            "description": "New watch pairing or handoff is disabled; existing control remains enforced."
+          }
+        }
+      }
+    },
+    "/watch/devices": {
+      "get": {
+        "tags": [
+          "Apple Watch"
+        ],
+        "security": [
+          {
+            "ownerCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "devices": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WatchDevice"
+                      }
+                    }
+                  },
+                  "required": [
+                    "enabled",
+                    "devices"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "401": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "409": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "423": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "426": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "429": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "503": {
+            "description": "New watch pairing or handoff is disabled; existing control remains enforced."
+          }
+        }
+      }
+    },
+    "/watch/devices/{id}": {
+      "delete": {
+        "tags": [
+          "Apple Watch"
+        ],
+        "security": [
+          {
+            "ownerCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "revoked": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "revoked"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "401": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "409": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "423": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "426": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "429": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "503": {
+            "description": "New watch pairing or handoff is disabled; existing control remains enforced."
+          }
+        }
+      }
+    },
+    "/sessions/{id}/watch-control": {
+      "get": {
+        "tags": [
+          "Apple Watch"
+        ],
+        "security": [
+          {
+            "ownerCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "401": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "409": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "423": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "426": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "429": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "503": {
+            "description": "New watch pairing or handoff is disabled; existing control remains enforced."
+          }
+        }
+      }
+    },
+    "/sessions/{id}/watch-handoff": {
+      "post": {
+        "tags": [
+          "Apple Watch"
+        ],
+        "security": [
+          {
+            "ownerCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "401": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "409": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "423": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "426": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "429": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "503": {
+            "description": "New watch pairing or handoff is disabled; existing control remains enforced."
+          }
+        }
+      }
+    },
+    "/sessions/{id}/watch-handoff/cancel": {
+      "post": {
+        "tags": [
+          "Apple Watch"
+        ],
+        "security": [
+          {
+            "ownerCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "401": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "409": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "423": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "426": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "429": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "503": {
+            "description": "New watch pairing or handoff is disabled; existing control remains enforced."
+          }
+        }
+      }
+    },
+    "/sessions/{id}/watch-force-return": {
+      "post": {
+        "tags": [
+          "Apple Watch"
+        ],
+        "security": [
+          {
+            "ownerCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "401": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "409": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "423": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "426": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "429": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "503": {
+            "description": "New watch pairing or handoff is disabled; existing control remains enforced."
+          }
+        }
+      }
+    },
+    "/watch/recovery": {
+      "get": {
+        "tags": [
+          "Apple Watch"
+        ],
+        "security": [
+          {
+            "ownerCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WatchRecovery"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "401": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "409": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "423": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "426": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "429": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "503": {
+            "description": "New watch pairing or handoff is disabled; existing control remains enforced."
+          }
+        }
+      }
+    },
+    "/watch/recovery/{id}": {
+      "get": {
+        "tags": [
+          "Apple Watch"
+        ],
+        "security": [
+          {
+            "ownerCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "sessionId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "createdAt": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "payload": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "sessionId",
+                    "createdAt",
+                    "payload"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "401": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "409": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "423": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "426": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "429": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "503": {
+            "description": "New watch pairing or handoff is disabled; existing control remains enforced."
+          }
+        }
+      }
+    },
+    "/watch/v1/session": {
+      "get": {
+        "tags": [
+          "Apple Watch"
+        ],
+        "security": [
+          {
+            "watchBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "protocolVersion": {
+                      "type": "integer",
+                      "const": 1
+                    },
+                    "contractVersion": {
+                      "type": "integer",
+                      "const": 2
+                    },
+                    "session": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/WatchSnapshot"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "protocolVersion",
+                    "contractVersion",
+                    "session"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "401": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "409": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "423": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "426": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "429": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "503": {
+            "description": "New watch pairing or handoff is disabled; existing control remains enforced."
+          }
+        }
+      }
+    },
+    "/watch/v1/handoff/accept": {
+      "post": {
+        "tags": [
+          "Apple Watch"
+        ],
+        "security": [
+          {
+            "watchBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "401": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "409": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "423": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "426": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "429": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "503": {
+            "description": "New watch pairing or handoff is disabled; existing control remains enforced."
+          }
+        }
+      }
+    },
+    "/watch/v1/control/release": {
+      "post": {
+        "tags": [
+          "Apple Watch"
+        ],
+        "security": [
+          {
+            "watchBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "401": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "409": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "423": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "426": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "429": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "503": {
+            "description": "New watch pairing or handoff is disabled; existing control remains enforced."
+          }
+        }
+      }
+    },
+    "/watch/v1/sessions/{id}": {
+      "put": {
+        "tags": [
+          "Apple Watch"
+        ],
+        "security": [
+          {
+            "watchBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchWrite"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchWriteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "401": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "409": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "423": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "426": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "429": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "503": {
+            "description": "New watch pairing or handoff is disabled; existing control remains enforced."
+          }
+        }
+      }
+    },
+    "/watch/v1/recovery": {
+      "post": {
+        "tags": [
+          "Apple Watch"
+        ],
+        "security": [
+          {
+            "watchBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchRecoveryWrite"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "recoveryId": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "recoveryId"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "401": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "409": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "423": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "426": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "429": {
+            "description": "Authentication, validation, version or control error; local records must be retained."
+          },
+          "503": {
+            "description": "New watch pairing or handoff is disabled; existing control remains enforced."
           }
         }
       }

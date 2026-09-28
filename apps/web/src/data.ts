@@ -6,20 +6,30 @@ export type Document = Program|Session|Equipment|CalendarEntry
 export type SyncMeta = { key: string; kind: Kind; id: string; version: number; synced: string; remote?: Document; conflict?: boolean }
 export type SyncOperation = { key: string; operationId: string; baseVersion: number; generation: string; payload: Document }
 export type EditorDraft = { key:string; kind:'program'|'history'; original:Program|Session; value:Program|Session; updatedAt:string }
+export type WatchCommand = {operationId:string;generation:string;baseVersion:number;controlEpoch:number;sessionId:string;deviceId?:string;handoffId?:string|null}
+export type WatchControl = {id:string;state:'phone'|'preparing'|'offered'|'watch'|'unknown';deviceId?:string|null;controlEpoch:number;handoffId?:string|null;checkedAt:number;pending?:{path:string;body:WatchCommand}}
 export const db = new Dexie('traininglog-v1') as Dexie & { editorDrafts:Table<EditorDraft,string>; equipment: Table<Equipment,string>; calendar: Table<CalendarEntry,string>; meta: Table<SyncMeta,string>; operations: Table<SyncOperation,string>; syncState: Table<{key:string;value:string},string>; conflictArchive: Table<{id:string;key:string;local:Document|undefined;remote:Document|undefined},string>; programs: Table<Program, string>; sessions: Table<Session, string>; outbox: Table<{ id: string; sessionId: string; revision: number; payload: Session }, string> }
 db.version(1).stores({ programs: 'id', sessions: 'id, status, startedAt', outbox: 'id, sessionId' })
 db.version(2).stores({ programs: 'id', sessions: 'id, status, startedAt', outbox: 'id, sessionId', meta: 'key', operations: 'key', syncState: 'key', conflictArchive: 'id, key' })
 db.version(3).stores({ equipment: 'id', calendar: 'id, date' })
 db.version(4).stores({ editorDrafts:'key, kind, updatedAt' })
+db.version(5).stores({ watchControls:'id, state' })
+export const watchControls=db.table<WatchControl,string>('watchControls')
+export async function assertSessionEditable(id:string) {
+ const control=await watchControls.get(id)
+ if(control&&control.state!=='phone')throw new Error('Тренировка передана часам или ожидает подтверждения управления. Сначала верните её на телефон.')
+}
 async function queue(s: Session) { await db.sessions.put(s); await db.outbox.put({ id: uid(), sessionId: s.id, revision: s.revision, payload: structuredClone(s) }) }
 export async function start(program: Program, day: Day, includeOptional = false) {
-  return db.transaction('rw', db.sessions, db.outbox, async () => {
+  return db.transaction('rw', db.sessions, db.outbox, watchControls, async () => {
+    if(await watchControls.filter(c=>c.state!=='phone').count())throw new Error('Сначала верните тренировку с часов.')
     if (await db.sessions.where('status').equals('active').filter(s=>!s.deletedAt).count()) throw new Error('Сначала завершите активную тренировку.')
     const s = makeSession(program, day, includeOptional); await queue(s); return s
   })
 }
 export async function change(id: string, revision: number, mutate: (session: Session) => boolean | void, enqueue = true) {
-  return db.transaction('rw', db.sessions, db.outbox, async () => {
+  return db.transaction('rw', db.sessions, db.outbox, watchControls, async () => {
+    await assertSessionEditable(id)
     const s = await db.sessions.get(id)
     if (!s || (revision !== -1 && s.revision !== revision)) throw new Error('Запись изменилась в другой вкладке. Обновите экран и повторите действие.')
     if (mutate(s) === false) return
@@ -36,7 +46,8 @@ export function download(data: Backup, name = 'traininglog') {
 }
 export async function restore(value: unknown) {
   const data = backupSchema.parse(value)
-  await navigator.locks.request('traininglog-sync', async () => db.transaction('rw', [db.programs, db.sessions, db.equipment, db.calendar, db.outbox, db.meta, db.operations, db.syncState, db.editorDrafts], async () => {
+  await navigator.locks.request('traininglog-sync', async () => db.transaction('rw', [db.programs, db.sessions, db.equipment, db.calendar, db.outbox, db.meta, db.operations, db.syncState, db.editorDrafts, watchControls], async () => {
+    if(await watchControls.filter(c=>c.state!=='phone').count())throw new Error('Перед восстановлением верните управление с часов. Их записи нельзя заменить импортом.')
     await db.editorDrafts.clear()
     await db.equipment.clear(); await db.calendar.clear(); await db.programs.clear(); await db.sessions.clear(); await db.outbox.clear(); await db.meta.clear(); await db.operations.clear(); await db.syncState.clear()
     await db.equipment.bulkAdd(data.equipment??[]); await db.calendar.bulkAdd(data.calendar??[]); await db.programs.bulkAdd(data.programs); await db.sessions.bulkAdd(data.sessions)
@@ -46,7 +57,8 @@ export async function restore(value: unknown) {
 }
 
 export async function lifecycleChange(kind:Kind,id:string,action:'archive'|'delete'|'restore') {
-  await db.transaction('rw',[db[kind]],async()=>{
+  await db.transaction('rw',[db[kind],watchControls],async()=>{
+    if(kind==='sessions')await assertSessionEditable(id)
     const table=db[kind] as Table<Document,string>, doc=await table.get(id)
     if(!doc)throw new Error('Запись не найдена.')
     if('status' in doc && doc.status==='active')throw new Error('Сначала завершите или отмените тренировку.')

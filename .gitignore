@@ -13,3 +13,12 @@ obj/
 
 # Снимки экрана и черновики агентов
 Claude outputs/
+
+# Xcode / local signing
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.local.xcconfig
+*.mobileprovision
+*.provisionprofile
+.build/

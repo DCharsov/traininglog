@@ -27,11 +27,21 @@ builder.Services.ConfigureApplicationCookie(o=>{
     o.Events.OnRedirectToAccessDenied=c=>{c.Response.StatusCode=403;return Task.CompletedTask;};
 });
 builder.Services.AddAuthorization();
+builder.Services.AddSingleton<DocumentWriter>();
 builder.Services.AddAntiforgery(o=>{
     o.HeaderName="X-CSRF-TOKEN";o.Cookie.Name="TrainingLog.Csrf";o.Cookie.Path="/training/api";o.Cookie.SameSite=SameSiteMode.Strict;
     o.Cookie.SecurePolicy=builder.Environment.IsDevelopment()?CookieSecurePolicy.SameAsRequest:CookieSecurePolicy.Always;
 });
 builder.Services.AddRateLimiter(o=>{o.RejectionStatusCode=429;o.AddFixedWindowLimiter("login",x=>{x.PermitLimit=10;x.Window=TimeSpan.FromMinutes(1);x.QueueLimit=0;});});
+builder.Services.AddRateLimiter(o=>{
+    o.GlobalLimiter=PartitionedRateLimiter.CreateChained(
+        PartitionedRateLimiter.Create<HttpContext,string>(c=>c.Request.Path.StartsWithSegments("/training/api/watch/pairing")
+            ? RateLimitPartition.GetFixedWindowLimiter("watch-pair-global",_=>new(){PermitLimit=60,Window=TimeSpan.FromMinutes(1),QueueLimit=0})
+            : RateLimitPartition.GetNoLimiter("other")),
+        PartitionedRateLimiter.Create<HttpContext,string>(c=>c.Request.Path.StartsWithSegments("/training/api/watch/pairing")
+            ? RateLimitPartition.GetFixedWindowLimiter(c.Connection.RemoteIpAddress?.ToString()??"unknown",_=>new(){PermitLimit=10,Window=TimeSpan.FromMinutes(1),QueueLimit=0})
+            : RateLimitPartition.GetNoLimiter("other")));
+});
 var app=builder.Build();
 using(var scope=app.Services.CreateScope()) {
     var store=scope.ServiceProvider.GetRequiredService<Store>();await store.Database.MigrateAsync();
@@ -50,7 +60,7 @@ app.UseStatusCodePages(async context=>{var c=context.HttpContext;await c.Respons
 app.UseAuthentication();app.UseAuthorization();app.UseRateLimiter();
 app.Use(async(ctx,next)=>{
     ctx.Response.Headers.CacheControl="no-store";
-    if(ctx.Request.Method is not ("GET" or "HEAD" or "OPTIONS")) {
+    if(ctx.Request.Method is not ("GET" or "HEAD" or "OPTIONS") && ctx.GetEndpoint()?.Metadata.GetMetadata<WatchBearerEndpoint>() == null && ctx.GetEndpoint()?.Metadata.GetMetadata<WatchRedeemEndpoint>() == null) {
         try {await ctx.RequestServices.GetRequiredService<IAntiforgery>().ValidateRequestAsync(ctx);}
         catch(AntiforgeryValidationException) {ctx.Response.StatusCode=400;await ctx.Response.WriteAsJsonAsync(new{error="csrf",message="Обновите страницу и повторите вход."});return;}
     }
@@ -66,13 +76,20 @@ api.MapPost("/auth/login",async(LoginRequest r,SignInManager<IdentityUser> sign)
     return result.Succeeded?Results.Ok():Results.Json(new{error="login",message="Неверный пароль или вход временно заблокирован."},statusCode:401);
 }).RequireRateLimiting("login");
 api.MapPost("/auth/logout",async(SignInManager<IdentityUser> sign)=>{await sign.SignOutAsync();return Results.Ok();}).RequireAuthorization();
-api.MapPost("/auth/password",async(PasswordRequest r,HttpContext c,UserManager<IdentityUser> users,SignInManager<IdentityUser> sign)=>{
+api.MapPost("/auth/password",async(PasswordRequest r,HttpContext c,UserManager<IdentityUser> users,SignInManager<IdentityUser> sign,Store db,DocumentWriter writer)=>{
     if(string.IsNullOrEmpty(r.NewPassword)||r.NewPassword.Length>256||string.IsNullOrEmpty(r.CurrentPassword)||r.CurrentPassword.Length>256)return Results.BadRequest();
+    await writer.Gate.WaitAsync(c.RequestAborted);
+    try {
+    await using var tx=await db.Database.BeginTransactionAsync(c.RequestAborted);
     var user=(await users.GetUserAsync(c.User))!;var result=await users.ChangePasswordAsync(user,r.CurrentPassword,r.NewPassword);
     if(!result.Succeeded)return Results.BadRequest(new{message="Проверьте текущий пароль. Новый: от 12 символов, заглавные и строчные буквы, цифра и спецсимвол."});
+    await db.WatchDevices.Where(x=>x.Owner==user.Id&&x.RevokedAt==null).ExecuteUpdateAsync(s=>s.SetProperty(x=>x.RevokedAt,DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
+    await db.WatchPairings.Where(x=>x.Owner==user.Id).ExecuteDeleteAsync();
+    await tx.CommitAsync(c.RequestAborted);
     await sign.RefreshSignInAsync(user);return Results.Ok();
+    } finally { writer.Gate.Release(); }
 }).RequireAuthorization().RequireRateLimiting("login");
-api.MapGet("/bootstrap",async(Store db)=>Results.Ok(new{contractVersion=2,generation=(await db.Settings.FindAsync("generation"))!.Value})).RequireAuthorization();
+api.MapGet("/bootstrap",async(Store db)=>Results.Ok(new{contractVersion=2,watchProtocolVersion=1,generation=(await db.Settings.FindAsync("generation"))!.Value})).RequireAuthorization();
 api.MapGet("/changes",async(long? after,string? generation,HttpContext c,Store db)=>{
     var gen=(await db.Settings.FindAsync("generation"))!.Value;
     if(generation!=gen)return Results.Json(new{error="generation",generation=gen},statusCode:409);
@@ -92,7 +109,7 @@ api.MapGet("/{kind}",async(string kind,long? after,HttpContext c,Store db)=>{
     var rows=await db.Changes.AsNoTracking().Where(x=>x.Owner==owner&&x.Kind==kind&&x.Sequence>(after??0)).OrderBy(x=>x.Sequence).Take(25).ToListAsync();
     return Results.Ok(new{items=rows.Select(x=>new{x.Id,x.Version,payload=JsonSerializer.Deserialize<JsonElement>(x.Payload)}),cursor=rows.LastOrDefault()?.Sequence??after??0,hasMore=rows.Count==25});
 }).RequireAuthorization();
-var writeGate=new SemaphoreSlim(1,1); // One SQLite writer; version check, operation receipt and change are one transaction.
+var writeGate=app.Services.GetRequiredService<DocumentWriter>().Gate;
 api.MapPut("/{kind}/{id}",async(string kind,string id,WriteRequest r,HttpContext c,Store db)=>{
     if(r.ContractVersion!=2)return Results.Json(new{error="schema",message="Доступно обновление дневника. Закройте все его вкладки и откройте снова. Локальные записи сохранятся."},statusCode:426);
     if(!Guid.TryParse(r.OperationId,out _) || r.BaseVersion<0 || !Validation.Valid(kind,id,r.Payload))return Results.BadRequest(new{error="validation",message="Неверный формат записи."});
@@ -103,13 +120,13 @@ api.MapPut("/{kind}/{id}",async(string kind,string id,WriteRequest r,HttpContext
         if(r.Generation!=generation)return Results.Json(new{error="generation",generation},statusCode:409);
         var owner=c.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var hash=Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new{kind,id,r.BaseVersion,r.Generation,r.Payload}))));
+        if(await DocumentWriter.WatchLocked(db,owner,kind,id))return Results.Json(new{error="session_controlled_by_watch",message="Тренировкой управляют часы. Дождитесь возврата управления."},statusCode:423);
         var applied=await db.Operations.FindAsync(owner,r.OperationId);
         if(applied!=null)return applied.Hash==hash?Results.Content(applied.Response,"application/json"):Results.Json(new{error="operation_reused"},statusCode:409);
         var doc=await db.Documents.FindAsync(owner,kind,id);
         if((doc?.Version??0)!=r.BaseVersion)return Results.Json(new{error="conflict",version=doc?.Version??0,payload=doc==null?(JsonElement?)null:JsonSerializer.Deserialize<JsonElement>(doc.Payload)},statusCode:409);
         if(doc==null) {doc=new(){Owner=owner,Kind=kind,Id=id};db.Documents.Add(doc);}
-        doc.Version++;doc.Payload=r.Payload.GetRawText();
-        db.Changes.Add(new(){Owner=owner,Kind=kind,Id=id,Version=doc.Version,Payload=doc.Payload});
+        DocumentWriter.Record(db,doc,r.Payload.GetRawText());
         var response=JsonSerializer.Serialize(new{version=doc.Version,generation});
         db.Operations.Add(new(){Owner=owner,Id=r.OperationId,Hash=hash,Response=response});
         await db.SaveChangesAsync(c.RequestAborted);await tx.CommitAsync(c.RequestAborted);
@@ -121,5 +138,6 @@ api.MapGet("/export",async(HttpContext c,Store db)=>{
     var docs=await db.Documents.AsNoTracking().Where(x=>x.Owner==owner).ToListAsync();
     return Results.Ok(new{equipment=docs.Where(x=>x.Kind=="equipment").Select(x=>JsonSerializer.Deserialize<JsonElement>(x.Payload)),calendar=docs.Where(x=>x.Kind=="calendar").Select(x=>JsonSerializer.Deserialize<JsonElement>(x.Payload)),schemaVersion=2,exportedAt=DateTimeOffset.UtcNow,programs=docs.Where(x=>x.Kind=="programs").Select(x=>JsonSerializer.Deserialize<JsonElement>(x.Payload)),sessions=docs.Where(x=>x.Kind=="sessions").Select(x=>JsonSerializer.Deserialize<JsonElement>(x.Payload))});
 }).RequireAuthorization();
+api.MapWatchApi();
 app.Run();
 public partial class Program {}

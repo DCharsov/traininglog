@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Activity, CalendarDays, ListChecks, Plus, Settings, TrendingUp } from 'lucide-react'
-import { change, db, lifecycleChange, start } from './data'
+import { change, db, lifecycleChange, start, watchControls } from './data'
+import WatchSessionPanel from './WatchSessionPanel'
 import { calendarSchema, confirmSet, programSchema, uid, visible, type Program, type Session, type SetRecord } from './domain'
 import { validateSet, type SetConfirmResult } from './setValidation'
 import { offerWeeklyOptional } from './hypertrophyAB'
@@ -69,9 +70,11 @@ export default function App() {
  const active=sessions.find(s=>s.status==='active')
  const inWorkout=!!active&&route.tab==='Сегодня'&&route.workoutOpen
  const viewing=route.viewId?sessions.find(s=>s.id===route.viewId):inWorkout?active:undefined
+ const watchControl=useLiveQuery(()=>viewing?watchControls.get(viewing.id):undefined,[viewing?.id])
+ const watchBlocked=!!watchControl&&watchControl.state!=='phone'
  const summary=route.summaryId?sessions.find(s=>s.id===route.summaryId):undefined
  useWakeLock(inWorkout)
- useRestNotice(active?.restEndsAt,!!active)
+ useRestNotice(active?.restEndsAt,!!active&&!watchBlocked)
  const calendar=(useLiveQuery(()=>db.calendar.toArray())??[]).filter(visible)
  const restToday=calendar.some(entry=>entry.date===new Date().toLocaleDateString('sv-SE'))
  const disabled=!editable||busy||updating
@@ -93,9 +96,9 @@ export default function App() {
   catch(e){setNotice('');setError(e instanceof Error?e.message:'Ошибка сохранения. Повторите.');return false}
   finally{setBusy(false)}
  }
- const mutate=(fn:(s:Session)=>boolean|void)=>{if(viewing&&editable)void run(()=>change(viewing.id,-1,fn))}
+ const mutate=(fn:(s:Session)=>boolean|void)=>{if(viewing&&editable&&!watchBlocked)void run(()=>change(viewing.id,-1,fn))}
  function draft(sessionId:string,exerciseId:string,setId:string,patch:Partial<SetRecord>) {
-  if(!editable)return
+  if(!editable||watchBlocked)return
   setNotice('Сохраняем подход…')
   pending.current=pending.current.then(async()=>{
    try{await change(sessionId,-1,s=>{const r=s.exercises.find(e=>e.id===exerciseId)?.records.find(x=>x.id===setId);if(!r)throw new Error('Подход уже изменился.');if(r.status!=='completed')Object.assign(r,patch)},false);failedDrafts.current.delete(setId);if(!failedDrafts.current.size){setError('');setNotice('Черновик сохранён на устройстве')}}
@@ -103,7 +106,7 @@ export default function App() {
   })
  }
  async function confirm(exerciseId:string,setId:string):Promise<SetConfirmResult> {
-  if(!editable||!viewing)return {ok:false,message:'Редактирование недоступно в этой вкладке.'}
+  if(!editable||!viewing||watchBlocked)return {ok:false,message:'Редактирование недоступно в этой вкладке.'}
   if(confirming.current.has(setId))return {ok:false,message:'Сохраняем подход…'}
   confirming.current.add(setId);setBusy(true);setError('')
   try{
@@ -173,9 +176,12 @@ export default function App() {
 
    {route.exerciseKey&&data&&<ExerciseScreen sessions={sessions} contextKey={route.exerciseKey} onOpen={id=>navigate({...route,exerciseKey:undefined,viewId:id})} onBack={()=>navigate({...route,exerciseKey:undefined})}/>}
    {!route.exerciseKey&&viewing&&((route.tab==='Сегодня'&&inWorkout)||(route.tab==='История'&&route.viewId))&&<>
+    <WatchSessionPanel id={viewing.id} disabled={disabled} enabled={!!sync.state?.enabled} run={run} ask={ask} beforeTransfer={async()=>{await pending.current;if(failedDrafts.current.size||confirming.current.size)throw new Error('Дождитесь сохранения подхода');if(route.editingHistory)throw new Error('Закройте редактор перед передачей')}}/>
+    <fieldset disabled={watchBlocked} style={{border:0,padding:0,margin:0,minWidth:0}}>
     {route.viewId&&<div className="actions"><button className="ghost" onClick={closeSession}>{route.origin==='Прогресс'?'К прогрессу':'К истории'}</button>{!route.editingHistory&&<button className="ghost" disabled={disabled} onClick={()=>navigate({...route,editingHistory:{}})}>Исправить запись</button>}</div>}
     {route.editingHistory?<HistoryEditor key={viewing.id} initial={viewing} initialExerciseId={route.editingHistory.exerciseId} initialSetId={route.editingHistory.setId} disabled={disabled} onClose={()=>navigate({...route,editingHistory:undefined},true)}/>:<WorkoutScreen key={viewing.id} session={viewing} sessions={sessions} programs={programs} disabled={disabled} editorKey={editorKey} run={run} mutate={mutate} draft={draft} confirm={confirm} change={change} finish={()=>void finish()} cancel={()=>void cancelWorkout()} restTimer={restTimer} onCollapse={()=>navigate({tab:'Сегодня',workoutOpen:false})} onEditSet={(exerciseId,setId)=>navigate({...route,editingHistory:{exerciseId,setId}})} onOpenExercise={key=>navigate({...route,exerciseKey:key})}/>}
     {route.viewId&&!route.editingHistory&&<div className="actions"><button className="ghost" disabled={disabled} onClick={()=>void run(()=>lifecycleChange('sessions',viewing.id,'archive'),'Тренировка в архиве').then(ok=>{if(ok)closeSession()})}>В архив</button><button className="ghost danger" disabled={disabled} onClick={()=>void ask('Переместить тренировку в корзину? Её можно восстановить в настройках.','Переместить').then(async ok=>{if(ok&&await run(()=>lifecycleChange('sessions',viewing.id,'delete'),'Тренировка в корзине'))closeSession()})}>В корзину</button></div>}
+    </fieldset>
    </>}
    {route.viewId&&!viewing&&!route.exerciseKey&&data&&<section className="card"><p>Запись недоступна. Проверьте архив и корзину.</p><button onClick={closeSession}>Назад</button></section>}
    {route.tab==='Прогресс'&&data&&<Progress sessions={sessions} state={progressState} onStateChange={setProgressState} onOpen={id=>openSession(id,'Прогресс')}/>}

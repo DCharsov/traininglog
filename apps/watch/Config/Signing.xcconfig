@@ -1,0 +1,2 @@
+// Personal Team belongs in the ignored local file, never in project.pbxproj.
+#include? "Signing.local.xcconfig"

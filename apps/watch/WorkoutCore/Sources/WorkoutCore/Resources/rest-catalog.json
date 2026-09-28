@@ -1,0 +1,224 @@
+{
+  "muscles": {
+    "Incline Pronated DB Bench Press": [
+      "chest",
+      "shoulders",
+      "triceps"
+    ],
+    "Flat Pronated DB Bench Press": [
+      "chest",
+      "triceps",
+      "shoulders"
+    ],
+    "Hammer Strength Decline Chest Press": [
+      "chest",
+      "triceps"
+    ],
+    "Pec Deck": [
+      "chest"
+    ],
+    "Push Ups": [
+      "chest",
+      "triceps",
+      "shoulders"
+    ],
+    "Lat Pulldown Lean Away Medium": [
+      "back",
+      "biceps"
+    ],
+    "Hammer Strength Overhand Row": [
+      "back",
+      "biceps"
+    ],
+    "Chest Supported Incline Neut": [
+      "back",
+      "biceps"
+    ],
+    "DB Pullover": [
+      "back",
+      "chest"
+    ],
+    "Seated Rear Delt Flys": [
+      "shoulders",
+      "back"
+    ],
+    "Barbell Deadlift": [
+      "back",
+      "hamstrings",
+      "glutes"
+    ],
+    "Cybex Medium Stance Leg Press": [
+      "quads",
+      "glutes"
+    ],
+    "DB Walking Lunges": [
+      "quads",
+      "glutes",
+      "hamstrings"
+    ],
+    "Lying Leg Curl - Neutral (Dorsi": [
+      "hamstrings"
+    ],
+    "DB RDL": [
+      "hamstrings",
+      "glutes",
+      "back"
+    ],
+    "Standing Calf Raise Machine Me": [
+      "calves"
+    ],
+    "Flat Bench DB Skull Crushers": [
+      "triceps"
+    ],
+    "Incline Supinated DB Curls": [
+      "biceps",
+      "forearms"
+    ],
+    "Cable Rope French Press": [
+      "triceps"
+    ],
+    "Cable Rope Tricep Pushdowns": [
+      "triceps"
+    ],
+    "Standing DB Hammer Curls": [
+      "biceps",
+      "forearms"
+    ],
+    "Cable Rope Hammer Curl": [
+      "biceps",
+      "forearms"
+    ],
+    "High Pulley Rope Cable Crunch": [
+      "abs"
+    ],
+    "Seated DB Shoulder Press": [
+      "shoulders",
+      "triceps"
+    ],
+    "Cable Rope Upright Row": [
+      "shoulders",
+      "back"
+    ],
+    "Standing DB Side Lateral Raises": [
+      "shoulders"
+    ],
+    "Cable Rope Face Pulls": [
+      "shoulders",
+      "back"
+    ],
+    "Band Pull Aparts": [
+      "shoulders",
+      "back"
+    ],
+    "Присед в Смите": [
+      "quads",
+      "glutes"
+    ],
+    "Жим ногами": [
+      "quads",
+      "glutes"
+    ],
+    "Жим гантелей лёжа на горизонтальной скамье": [
+      "chest",
+      "triceps",
+      "shoulders"
+    ],
+    "Жим гантелей на небольшом наклоне скамьи": [
+      "chest",
+      "triceps",
+      "shoulders"
+    ],
+    "Горизонтальная тяга блока": [
+      "back",
+      "biceps"
+    ],
+    "Тяга верхнего блока к груди": [
+      "back",
+      "biceps"
+    ],
+    "Сгибание ног сидя в тренажёре": [
+      "hamstrings"
+    ],
+    "Подъёмы гантелей через стороны": [
+      "shoulders"
+    ],
+    "Разгибание рук с канатом на трицепс": [
+      "triceps"
+    ],
+    "Сгибания рук с гантелями на бицепс": [
+      "biceps",
+      "forearms"
+    ],
+    "Подъёмы на носки стоя с опорой руками": [
+      "calves"
+    ],
+    "Face pull — тяга каната к лицу": [
+      "shoulders",
+      "back"
+    ],
+    "Dead bug": [
+      "abs"
+    ],
+    "Bird dog": [
+      "abs"
+    ]
+  },
+  "aliases": {
+    "incline pronated db bench press": "Incline Pronated DB Bench Press",
+    "жим гантелей на наклонной скамье": "Incline Pronated DB Bench Press",
+    "flat pronated db bench press": "Flat Pronated DB Bench Press",
+    "жим гантелей лёжа": "Flat Pronated DB Bench Press",
+    "hammer strength decline chest press": "Hammer Strength Decline Chest Press",
+    "жим на нижнюю часть груди в hammer strength": "Hammer Strength Decline Chest Press",
+    "pec deck": "Pec Deck",
+    "сведение рук в тренажёре «бабочка»": "Pec Deck",
+    "push ups": "Push Ups",
+    "отжимания от пола": "Push Ups",
+    "lat pulldown lean away medium …": "Lat Pulldown Lean Away Medium …",
+    "тяга верхнего блока с небольшим отклонением": "Lat Pulldown Lean Away Medium …",
+    "hammer strength overhand row": "Hammer Strength Overhand Row",
+    "тяга в hammer strength хватом сверху": "Hammer Strength Overhand Row",
+    "chest supported incline neut…": "Chest Supported Incline Neut…",
+    "тяга гантелей с упором грудью, нейтральный хват": "Chest Supported Incline Neut…",
+    "db pullover": "DB Pullover",
+    "пуловер с гантелью": "DB Pullover",
+    "seated rear delt flys": "Seated Rear Delt Flys",
+    "разведения гантелей в наклоне сидя": "Seated Rear Delt Flys",
+    "barbell deadlift": "Barbell Deadlift",
+    "становая тяга со штангой": "Barbell Deadlift",
+    "cybex medium stance leg press": "Cybex Medium Stance Leg Press",
+    "жим ногами в cybex, средняя постановка": "Cybex Medium Stance Leg Press",
+    "db walking lunges": "DB Walking Lunges",
+    "выпады с гантелями в ходьбе": "DB Walking Lunges",
+    "lying leg curl - neutral (dorsi…": "Lying Leg Curl - Neutral (Dorsi…",
+    "сгибание ног лёжа в тренажёре": "Lying Leg Curl - Neutral (Dorsi…",
+    "db rdl": "DB RDL",
+    "румынская тяга с гантелями": "DB RDL",
+    "standing calf raise machine me…": "Standing Calf Raise Machine Me…",
+    "подъём на носки стоя в тренажёре": "Standing Calf Raise Machine Me…",
+    "flat bench db skull crushers": "Flat Bench DB Skull Crushers",
+    "французский жим с гантелями лёжа": "Flat Bench DB Skull Crushers",
+    "incline supinated db curls": "Incline Supinated DB Curls",
+    "сгибание рук с гантелями на наклонной скамье": "Incline Supinated DB Curls",
+    "cable rope french press": "Cable Rope French Press",
+    "разгибание рук с канатом из-за головы": "Cable Rope French Press",
+    "cable rope tricep pushdowns": "Cable Rope Tricep Pushdowns",
+    "разгибание рук с канатом вниз": "Cable Rope Tricep Pushdowns",
+    "standing db hammer curls": "Standing DB Hammer Curls",
+    "сгибание рук «молоток» стоя": "Standing DB Hammer Curls",
+    "cable rope hammer curl": "Cable Rope Hammer Curl",
+    "сгибание рук «молоток» с канатом": "Cable Rope Hammer Curl",
+    "high pulley rope cable crunch": "High Pulley Rope Cable Crunch",
+    "скручивания стоя с канатом верхнего блока": "High Pulley Rope Cable Crunch",
+    "seated db shoulder press": "Seated DB Shoulder Press",
+    "жим гантелей сидя": "Seated DB Shoulder Press",
+    "cable rope upright row": "Cable Rope Upright Row",
+    "тяга каната к подбородку": "Cable Rope Upright Row",
+    "standing db side lateral raises": "Standing DB Side Lateral Raises",
+    "подъём гантелей через стороны стоя": "Standing DB Side Lateral Raises",
+    "cable rope face pulls": "Cable Rope Face Pulls",
+    "тяга каната к лицу": "Cable Rope Face Pulls",
+    "band pull aparts": "Band Pull Aparts",
+    "разведение рук с резинкой": "Band Pull Aparts"
+  }
+}

@@ -1,0 +1,353 @@
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "programId": "00000000-0000-4000-8000-000000000002",
+  "programVersion": 1,
+  "dayId": "00000000-0000-4000-8000-000000000003",
+  "name": "Демо · без отправки на сервер",
+  "status": "active",
+  "startedAt": "2026-09-28T12:00:00.000Z",
+  "completedAt": null,
+  "localDate": "2026-09-28",
+  "timezone": "Asia/Yekaterinburg",
+  "revision": 1,
+  "restEndsAt": null,
+  "futureSession": {
+    "preserve": [
+      "yes",
+      42
+    ]
+  },
+  "exercises": [
+    {
+      "id": "00000000-0000-4000-8000-000000000010",
+      "variantId": "00000000-0000-4000-8000-000000000110",
+      "equipmentId": "00000000-0000-4000-8000-000000000210",
+      "name": "Жим гантелей лёжа на горизонтальной скамье",
+      "equipment": "Тестовое оборудование",
+      "mode": "PerDumbbell",
+      "sets": 3,
+      "target": "8–12",
+      "rest": null,
+      "stepGrams": 1000,
+      "availableGrams": [
+        8000,
+        10000,
+        12500,
+        15000
+      ],
+      "futureExercise": {
+        "preserve": true
+      },
+      "records": [
+        {
+          "id": "00000000-0000-4000-8000-000000000101",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000102",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000103",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null
+        }
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000020",
+      "variantId": "00000000-0000-4000-8000-000000000120",
+      "equipmentId": "00000000-0000-4000-8000-000000000220",
+      "name": "Сгибания рук с гантелями на бицепс",
+      "equipment": "Тестовое оборудование",
+      "mode": "PerDumbbell",
+      "sets": 3,
+      "target": "8–12",
+      "rest": null,
+      "stepGrams": 1000,
+      "supersetGroup": "A",
+      "records": [
+        {
+          "id": "00000000-0000-4000-8000-000000000201",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000202",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000203",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null
+        }
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000030",
+      "variantId": "00000000-0000-4000-8000-000000000130",
+      "equipmentId": "00000000-0000-4000-8000-000000000230",
+      "name": "Разгибание рук с канатом на трицепс",
+      "equipment": "Тестовое оборудование",
+      "mode": "MachineStack",
+      "sets": 3,
+      "target": "8–12",
+      "rest": null,
+      "stepGrams": 1000,
+      "supersetGroup": "A",
+      "records": [
+        {
+          "id": "00000000-0000-4000-8000-000000000301",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000302",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000303",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null
+        }
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000040",
+      "variantId": "00000000-0000-4000-8000-000000000140",
+      "equipmentId": "00000000-0000-4000-8000-000000000240",
+      "name": "Тяга гантели одной рукой",
+      "equipment": "Тестовое оборудование",
+      "mode": "PerDumbbell",
+      "sets": 3,
+      "target": "8–12",
+      "rest": null,
+      "stepGrams": 1000,
+      "unilateral": true,
+      "records": [
+        {
+          "id": "00000000-0000-4000-8000-000000000401",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null,
+          "side": "left"
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000402",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null,
+          "side": "right"
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000403",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null,
+          "side": "left"
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000404",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null,
+          "side": "right"
+        }
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000050",
+      "variantId": "00000000-0000-4000-8000-000000000150",
+      "equipmentId": "00000000-0000-4000-8000-000000000250",
+      "name": "Планка",
+      "equipment": "Тестовое оборудование",
+      "mode": "BodyweightOnly",
+      "sets": 3,
+      "target": "30–60 с",
+      "rest": null,
+      "stepGrams": 1000,
+      "tracking": "duration",
+      "muscle": "abs",
+      "records": [
+        {
+          "id": "00000000-0000-4000-8000-000000000501",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000502",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000503",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null
+        }
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000060",
+      "variantId": "00000000-0000-4000-8000-000000000160",
+      "equipmentId": "00000000-0000-4000-8000-000000000260",
+      "name": "Подтягивания с помощью",
+      "equipment": "Тестовое оборудование",
+      "mode": "AssistedBodyweight",
+      "sets": 3,
+      "target": "8–12",
+      "rest": 120,
+      "stepGrams": 1000,
+      "records": [
+        {
+          "id": "00000000-0000-4000-8000-000000000601",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "warmup",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null,
+          "futureRecord": "keep"
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000602",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000603",
+          "status": "draft",
+          "weight": "",
+          "reps": "",
+          "rir": "",
+          "note": "",
+          "kind": "working",
+          "loadGrams": null,
+          "count": null,
+          "completedAt": null
+        }
+      ]
+    }
+  ]
+}
