@@ -10,8 +10,10 @@ public class Store(DbContextOptions<Store> options) : IdentityDbContext<Identity
     public DbSet<Setting> Settings => Set<Setting>();
     public DbSet<WatchDevice> WatchDevices => Set<WatchDevice>();
     public DbSet<WatchPairing> WatchPairings => Set<WatchPairing>();
+    public DbSet<WatchLinkRequest> WatchLinkRequests => Set<WatchLinkRequest>();
     public DbSet<WatchControl> WatchControls => Set<WatchControl>();
     public DbSet<WatchRecovery> WatchRecoveries => Set<WatchRecovery>();
+    public DbSet<WorkoutReservation> WorkoutReservations => Set<WorkoutReservation>();
     protected override void OnModelCreating(ModelBuilder b) {
         base.OnModelCreating(b);
         b.Entity<Document>().HasKey(x => new { x.Owner, x.Kind, x.Id });
@@ -21,9 +23,14 @@ public class Store(DbContextOptions<Store> options) : IdentityDbContext<Identity
         b.Entity<WatchDevice>().HasKey(x => x.Id);
         b.Entity<WatchDevice>().HasIndex(x => x.TokenHash).IsUnique();
         b.Entity<WatchPairing>().HasKey(x => x.Hash);
+        b.Entity<WatchLinkRequest>().HasKey(x => x.Id);
+        b.Entity<WatchLinkRequest>().HasIndex(x => new { x.Owner, x.ExpiresAt });
         b.Entity<WatchControl>().HasKey(x => new { x.Owner, x.SessionId });
         b.Entity<WatchRecovery>().HasKey(x => x.Id);
         b.Entity<WatchRecovery>().HasIndex(x => new { x.Owner, x.SessionId });
+        b.Entity<WorkoutReservation>().HasKey(x => x.Owner);
+        b.Entity<WorkoutReservation>().HasIndex(x => x.Id).IsUnique();
+        b.Entity<WorkoutReservation>().Property(x => x.Version).IsConcurrencyToken();
     }
 }
 public class Document { public string Owner {get;set;}=""; public string Kind {get;set;}=""; public string Id {get;set;}=""; public long Version {get;set;} public string Payload {get;set;}=""; }

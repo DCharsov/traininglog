@@ -1,0 +1,20 @@
+[
+ {"name":"manual","profile":{},"valid":true},
+ {"name":"null step","profile":{"stepGrams":null},"valid":true},
+ {"name":"one gram","profile":{"stepGrams":1},"valid":true},
+ {"name":"maximum step","profile":{"stepGrams":2000000},"valid":true},
+ {"name":"zero step","profile":{"stepGrams":0},"valid":false},
+ {"name":"negative step","profile":{"stepGrams":-1},"valid":false},
+ {"name":"oversized step","profile":{"stepGrams":2000001},"valid":false},
+ {"name":"fractional gram step","profile":{"stepGrams":1.5},"valid":false},
+ {"name":"text step","profile":{"stepGrams":"2500"},"valid":false},
+ {"name":"empty list","profile":{"availableGrams":[]},"valid":true},
+ {"name":"unsorted duplicate valid values","profile":{"availableGrams":[2000000,0,7500,7500]},"valid":true},
+ {"name":"null list","profile":{"availableGrams":null},"valid":false},
+ {"name":"wrong list type","profile":{"availableGrams":"7500"},"valid":false},
+ {"name":"negative weight","profile":{"availableGrams":[-1]},"valid":false},
+ {"name":"fractional gram weight","profile":{"availableGrams":[0.5]},"valid":false},
+ {"name":"oversized weight","profile":{"availableGrams":[2000001]},"valid":false},
+ {"name":"text weight","profile":{"availableGrams":["7500"]},"valid":false},
+ {"name":"null weight","profile":{"availableGrams":[null]},"valid":false}
+]

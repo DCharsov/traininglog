@@ -34,11 +34,13 @@ builder.Services.AddAntiforgery(o=>{
 });
 builder.Services.AddRateLimiter(o=>{o.RejectionStatusCode=429;o.AddFixedWindowLimiter("login",x=>{x.PermitLimit=10;x.Window=TimeSpan.FromMinutes(1);x.QueueLimit=0;});});
 builder.Services.AddRateLimiter(o=>{
+    o.AddFixedWindowLimiter("watch-link-start",x=>{x.PermitLimit=20;x.Window=TimeSpan.FromMinutes(1);x.QueueLimit=0;});
+    o.AddFixedWindowLimiter("watch-link-poll",x=>{x.PermitLimit=120;x.Window=TimeSpan.FromMinutes(1);x.QueueLimit=0;});
     o.GlobalLimiter=PartitionedRateLimiter.CreateChained(
-        PartitionedRateLimiter.Create<HttpContext,string>(c=>c.Request.Path.StartsWithSegments("/training/api/watch/pairing")
+        PartitionedRateLimiter.Create<HttpContext,string>(c=>c.Request.Path.StartsWithSegments("/training/api/watch/pairing") || c.Request.Path == "/training/api/watch/link/request" || c.Request.Path == "/training/api/watch/link/window"
             ? RateLimitPartition.GetFixedWindowLimiter("watch-pair-global",_=>new(){PermitLimit=60,Window=TimeSpan.FromMinutes(1),QueueLimit=0})
             : RateLimitPartition.GetNoLimiter("other")),
-        PartitionedRateLimiter.Create<HttpContext,string>(c=>c.Request.Path.StartsWithSegments("/training/api/watch/pairing")
+        PartitionedRateLimiter.Create<HttpContext,string>(c=>c.Request.Path.StartsWithSegments("/training/api/watch/pairing") || c.Request.Path == "/training/api/watch/link/request" || c.Request.Path == "/training/api/watch/link/window"
             ? RateLimitPartition.GetFixedWindowLimiter(c.Connection.RemoteIpAddress?.ToString()??"unknown",_=>new(){PermitLimit=10,Window=TimeSpan.FromMinutes(1),QueueLimit=0})
             : RateLimitPartition.GetNoLimiter("other")));
 });
@@ -85,11 +87,12 @@ api.MapPost("/auth/password",async(PasswordRequest r,HttpContext c,UserManager<I
     if(!result.Succeeded)return Results.BadRequest(new{message="Проверьте текущий пароль. Новый: от 12 символов, заглавные и строчные буквы, цифра и спецсимвол."});
     await db.WatchDevices.Where(x=>x.Owner==user.Id&&x.RevokedAt==null).ExecuteUpdateAsync(s=>s.SetProperty(x=>x.RevokedAt,DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
     await db.WatchPairings.Where(x=>x.Owner==user.Id).ExecuteDeleteAsync();
+    await db.WatchLinkRequests.Where(x=>x.Owner==user.Id).ExecuteDeleteAsync();
     await tx.CommitAsync(c.RequestAborted);
     await sign.RefreshSignInAsync(user);return Results.Ok();
     } finally { writer.Gate.Release(); }
 }).RequireAuthorization().RequireRateLimiting("login");
-api.MapGet("/bootstrap",async(Store db)=>Results.Ok(new{contractVersion=2,watchProtocolVersion=1,generation=(await db.Settings.FindAsync("generation"))!.Value})).RequireAuthorization();
+api.MapGet("/bootstrap",async(Store db)=>Results.Ok(new{contractVersion=2,watchProtocolVersion=1,watchReservationsVersion=1,generation=(await db.Settings.FindAsync("generation"))!.Value})).RequireAuthorization();
 api.MapGet("/changes",async(long? after,string? generation,HttpContext c,Store db)=>{
     var gen=(await db.Settings.FindAsync("generation"))!.Value;
     if(generation!=gen)return Results.Json(new{error="generation",generation=gen},statusCode:409);
@@ -121,12 +124,15 @@ api.MapPut("/{kind}/{id}",async(string kind,string id,WriteRequest r,HttpContext
         var owner=c.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var hash=Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new{kind,id,r.BaseVersion,r.Generation,r.Payload}))));
         if(await DocumentWriter.WatchLocked(db,owner,kind,id))return Results.Json(new{error="session_controlled_by_watch",message="Тренировкой управляют часы. Дождитесь возврата управления."},statusCode:423);
+        if(await DocumentWriter.ReservationLocked(db,owner,kind,id,r.Payload))return Results.Json(new{error="workout_reserved",message="Следующая тренировка подготовлена для часов. Сначала завершите или отмените резервирование."},statusCode:423);
         var applied=await db.Operations.FindAsync(owner,r.OperationId);
         if(applied!=null)return applied.Hash==hash?Results.Content(applied.Response,"application/json"):Results.Json(new{error="operation_reused"},statusCode:409);
         var doc=await db.Documents.FindAsync(owner,kind,id);
         if((doc?.Version??0)!=r.BaseVersion)return Results.Json(new{error="conflict",version=doc?.Version??0,payload=doc==null?(JsonElement?)null:JsonSerializer.Deserialize<JsonElement>(doc.Payload)},statusCode:409);
+        var savedPayload=kind=="programs"?DocumentWriter.PreserveDayArchives(doc?.Payload,r.Payload):r.Payload.GetRawText();
         if(doc==null) {doc=new(){Owner=owner,Kind=kind,Id=id};db.Documents.Add(doc);}
-        DocumentWriter.Record(db,doc,r.Payload.GetRawText());
+        DocumentWriter.Record(db,doc,savedPayload);
+        if(kind=="sessions")await DocumentWriter.CompleteReservation(db,owner,id,r.Payload);
         var response=JsonSerializer.Serialize(new{version=doc.Version,generation});
         db.Operations.Add(new(){Owner=owner,Id=r.OperationId,Hash=hash,Response=response});
         await db.SaveChangesAsync(c.RequestAborted);await tx.CommitAsync(c.RequestAborted);

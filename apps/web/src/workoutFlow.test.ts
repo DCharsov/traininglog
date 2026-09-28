@@ -2,6 +2,17 @@ import { expect,it } from 'vitest'
 import { broSplit } from './broSplit'
 import { makeSession,uid } from './domain'
 import { nextDay,nextSet,setSequence } from './workoutFlow'
+it('skips archived days without changing historical snapshots',()=>{
+ const p=structuredClone(broSplit),s=makeSession(p,p.days[0]),snapshot=structuredClone(s)
+ p.days[0].archivedAt='2026-09-28T10:00:00Z'
+ expect(nextDay(p,[]).day.id).toBe(p.days[1].id)
+ expect(()=>makeSession(p,p.days[0])).toThrow()
+ expect(s).toEqual(snapshot)
+ for(const day of p.days)day.archivedAt='2026-09-28T10:00:00Z'
+ expect(()=>nextDay(p,[])).toThrow()
+ p.days[0].archivedAt=null
+ expect(nextDay(p,[]).day.id).toBe(p.days[0].id)
+})
 it('suggests next day from completed records only and cycles without using calendar gaps',()=>{
  const p=structuredClone(broSplit),s=makeSession(p,p.days[1]);s.status='completed';s.startedAt='2020-01-01T00:00:00.000Z'
  const cancel=makeSession(p,p.days[4]);cancel.status='cancelled'

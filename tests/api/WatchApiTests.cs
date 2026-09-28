@@ -11,15 +11,15 @@ using TrainingLog;
 
 namespace TrainingLogTests;
 
-public class WatchApiTests {
+public partial class WatchApiTests {
     const string Password = "Watch-tests-only!123";
-    sealed class Factory : WebApplicationFactory<Program> {
+    sealed class Factory(bool reservationsEnabled = true) : WebApplicationFactory<Program> {
         public readonly string DirectoryPath = Path.Combine(Path.GetTempPath(), "traininglog-watch-tests-" + Guid.NewGuid());
         protected override void ConfigureWebHost(IWebHostBuilder b) {
             Directory.CreateDirectory(DirectoryPath);
             File.WriteAllText(Path.Combine(DirectoryPath, "password"), Password);
             b.UseEnvironment("Development").UseSetting("DataDirectory", DirectoryPath)
-                .UseSetting("OwnerPasswordFile", Path.Combine(DirectoryPath, "password")).UseSetting("Watch:Enabled", "true");
+                .UseSetting("OwnerPasswordFile", Path.Combine(DirectoryPath, "password")).UseSetting("Watch:Enabled", "true").UseSetting("Watch:ReservationsEnabled", reservationsEnabled ? "true" : "false");
         }
         protected override void Dispose(bool disposing) {
             base.Dispose(disposing);
@@ -169,5 +169,48 @@ public class WatchApiTests {
         var results = await Task.WhenAll(phone.PostAsJsonAsync(path, command), phone.PostAsJsonAsync(path, command with { OperationId = Guid.NewGuid().ToString() }));
         Assert.Single(results, r => r.IsSuccessStatusCode);
         Assert.Single(results, r => r.StatusCode == HttpStatusCode.Conflict);
+    }
+
+    [Fact] public async Task No_code_link_requires_owner_window_secret_and_explicit_approval() {
+        await using var factory = new Factory(); using var phone = factory.CreateClient(); using var watch = factory.CreateClient();
+        await Login(phone);
+        var request = new WatchLinkStart(Guid.NewGuid().ToString(), Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32)), "TEST WATCH");
+        Assert.Equal(HttpStatusCode.Conflict, (await watch.PostAsJsonAsync("/training/api/watch/link/request", request)).StatusCode);
+        await Read(await phone.PostAsJsonAsync("/training/api/watch/link/window", new {}));
+        var pending = await Read(await watch.PostAsJsonAsync("/training/api/watch/link/request", request));
+        Assert.Equal("pending", pending.GetProperty("state").GetString());
+        Assert.Equal(pending.GetRawText(), (await Read(await watch.PostAsJsonAsync("/training/api/watch/link/request", request))).GetRawText());
+        Assert.Equal(HttpStatusCode.Gone, (await watch.PostAsJsonAsync("/training/api/watch/link/status", new WatchLinkPoll(request.Id, new string('0',64)))).StatusCode);
+        watch.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",request.Token);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await watch.GetAsync("/training/api/watch/v1/session")).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await watch.PostAsJsonAsync($"/training/api/watch/link/requests/{request.Id}/approve", new{})).StatusCode);
+        var list = await phone.GetFromJsonAsync<JsonElement>("/training/api/watch/link/requests");
+        Assert.Equal(pending.GetProperty("label").GetString(), list[0].GetProperty("label").GetString());
+        await Read(await phone.PostAsJsonAsync($"/training/api/watch/link/requests/{request.Id}/approve", new{}));
+        await Read(await phone.PostAsJsonAsync($"/training/api/watch/link/requests/{request.Id}/approve", new{}));
+        var approved = await Read(await watch.PostAsJsonAsync("/training/api/watch/link/status",new WatchLinkPoll(request.Id,request.Token)));
+        Assert.Equal("approved",approved.GetProperty("state").GetString());
+        Assert.Equal(HttpStatusCode.OK,(await watch.GetAsync("/training/api/watch/v1/session")).StatusCode);
+        using var scope=factory.Services.CreateScope();var db=scope.ServiceProvider.GetRequiredService<Store>();
+        Assert.NotEqual(request.Token,(await db.WatchLinkRequests.SingleAsync()).TokenHash);
+        Assert.Equal(1,await db.WatchDevices.CountAsync());
+        await Read(await phone.DeleteAsync($"/training/api/watch/devices/{request.Id}"));
+        Assert.Equal(HttpStatusCode.Unauthorized,(await watch.PostAsJsonAsync("/training/api/watch/link/status",new WatchLinkPoll(request.Id,request.Token))).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized,(await watch.PostAsJsonAsync("/training/api/watch/link/request",request)).StatusCode);
+    }
+
+    [Fact] public async Task Expired_and_replaced_link_windows_cannot_be_approved() {
+        await using var factory = new Factory(); using var phone = factory.CreateClient(); using var watch = factory.CreateClient();
+        await Login(phone);await Read(await phone.PostAsJsonAsync("/training/api/watch/link/window",new{}));
+        var request=new WatchLinkStart(Guid.NewGuid().ToString(),Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32)),"TEST");
+        await Read(await watch.PostAsJsonAsync("/training/api/watch/link/request",request));
+        using var scope=factory.Services.CreateScope();var db=scope.ServiceProvider.GetRequiredService<Store>();
+        await db.WatchLinkRequests.ExecuteUpdateAsync(s=>s.SetProperty(x=>x.ExpiresAt,0));
+        Assert.Equal(HttpStatusCode.Conflict,(await phone.PostAsJsonAsync($"/training/api/watch/link/requests/{request.Id}/approve",new{})).StatusCode);
+        Assert.Equal(HttpStatusCode.Gone,(await watch.PostAsJsonAsync("/training/api/watch/link/status",new WatchLinkPoll(request.Id,request.Token))).StatusCode);
+        await Read(await phone.PostAsJsonAsync("/training/api/watch/link/window",new{}));
+        request=request with {Id=Guid.NewGuid().ToString()};await Read(await watch.PostAsJsonAsync("/training/api/watch/link/request",request));
+        await Read(await phone.PostAsJsonAsync("/training/api/watch/link/window",new{}));
+        Assert.Equal(HttpStatusCode.Conflict,(await phone.PostAsJsonAsync($"/training/api/watch/link/requests/{request.Id}/approve",new{})).StatusCode);
     }
 }

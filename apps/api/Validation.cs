@@ -58,7 +58,7 @@ public static class Validation {
             }
             else if(kind=="programs") {
                 OptionalText(e,"seedKey");if(e.TryGetProperty("contentRevision",out _))Number(e,"contentRevision",1,int.MaxValue);Number(e,"version",1,int.MaxValue);OptionalText(e,"sourceNote");var days=Array(e,"days",1,30);Unique(days);
-                foreach(var d in days) {Text(d,"name",2000,false);var a=Array(d,"exercises",1,50);Unique(a);foreach(var x in a) Exercise(x,false);}
+                foreach(var d in days) {Text(d,"name",2000,false);if(d.TryGetProperty("archivedAt",out _))Time(d,"archivedAt",true);var a=Array(d,"exercises",1,50);Unique(a);foreach(var x in a) Exercise(x,false);}
             } else if(kind=="sessions") {
                 Id(e,"programId");Id(e,"dayId");Number(e,"programVersion",1,int.MaxValue);Number(e,"revision",1,int.MaxValue);
                 Require(new[]{"active","completed","cancelled"}.Contains(Text(e,"status")));

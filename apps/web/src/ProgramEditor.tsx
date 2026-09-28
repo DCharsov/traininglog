@@ -64,6 +64,7 @@ export default function ProgramEditor({initial,save,onCancel}:Props) {
   {p.days.map((d,di)=><section className="card" key={d.id}>
    <div className="section-head">
     <span className="eyebrow">ДЕНЬ {di+1}</span>
+    <button type="button" onClick={()=>update(p=>{p.days[di].archivedAt=d.archivedAt?null:new Date().toISOString()})}>{d.archivedAt?'Вернуть из архива':'Архивировать день'}</button>
     <div className="order-actions">
      <button type="button" aria-label={'День '+(di+1)+' выше'} disabled={di===0} onClick={()=>update(p=>moveItem(p.days,di,-1))}>↑</button>
      <button type="button" aria-label={'День '+(di+1)+' ниже'} disabled={di===p.days.length-1} onClick={()=>update(p=>moveItem(p.days,di,1))}>↓</button>

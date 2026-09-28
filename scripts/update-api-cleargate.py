@@ -17,7 +17,7 @@ previous = current.resolve(strict=True)
 assert previous.parent == releases
 release = releases / datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S')
 release.mkdir()
-with tarfile.open('/root/traininglog-deploy/api-update.tar.gz') as archive:
+with tarfile.open(os.environ.get('TRAININGLOG_API_ARCHIVE', '/root/traininglog-deploy/api-update.tar.gz')) as archive:
     archive.extractall(release, filter='data')
 assert (release / 'api').is_file() and (release / 'openapi.json').is_file()
 (release / 'api').chmod(0o755)

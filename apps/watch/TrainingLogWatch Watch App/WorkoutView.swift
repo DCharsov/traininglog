@@ -14,7 +14,24 @@ struct ContentView: View {
             ScrollView {
                 VStack(spacing: 10) {
                     Color.clear.frame(height: 1).id("workoutTop")
+                    if model.reservation.blocked {
+                        Text("Подготовка отклонена. Запрос сохранён.").font(.caption)
+                        Button("Сверить резерв с сервером") { Task { await model.reconcileReservation() } }.disabled(model.syncing)
+                    }
+                    if !model.reservation.blocked, model.reservation.snapshot["state"].string == "ready", model.state?.workout.id != model.reservation.snapshot["reservationId"].string {
+                        Text("Готово без интернета").font(.headline)
+                        Text(model.reservation.snapshot["payload"]["name"].string ?? "Следующая тренировка")
+                        Button("Начать подготовленную") { Task { await model.startReserved() } }.disabled(model.busy || model.reservation.blocked)
+                    }
                     if let state = model.state {
+                        if !state.isDemo {
+                            NavigationLink { WatchHealthView(health: model.health, state: state) } label: {
+                                TimelineView(.periodic(from: .now, by: 1)) { context in
+                                    let fresh = model.health.pulse != nil && (model.health.pulseDate.map { (0..<30).contains(context.date.timeIntervalSince($0)) } ?? false)
+                                    Text(fresh ? "♥ \(Int(model.health.pulse ?? 0)) уд/мин" : "♥ — · Здоровье").foregroundStyle(.red)
+                                }
+                            }
+                        }
                         if state.workout.active && model.editable {
                             if let end = state.workout.restEndsAt {
                                 TimelineView(.periodic(from: .now, by: 1)) { context in
@@ -54,14 +71,13 @@ struct ContentView: View {
                     } else if model.ready {
                         Text("TrainingLog").font(.title2.bold())
                         Text("Тренировки на часах").font(.headline)
-                        Text("Подключите дневник и передайте тренировку с телефона. Демо работает отдельно, без отправки.").font(.footnote)
+                        Text("Начните тренировку в TrainingLog на iPhone — она появится здесь автоматически.").font(.footnote)
                         Button("Открыть демо") { Task { await model.demo() } }
                     } else {
                         Text("Загрузка локальных данных…")
                     }
-                    NavigationLink(model.connected ? "Подключение к дневнику" : "Подключить дневник") { WatchPairingView(model: model) }
+                    Text(model.companionBridge.status).font(.caption2).foregroundStyle(.secondary)
                     if model.connected {
-                        Button("Принять тренировку") { Task { await model.receive() } }.disabled(model.syncing)
                         if model.state?.isDemo == false {
                             Button("Отправить записи") { Task { await model.synchronize(force: true) } }.disabled(model.syncing)
                             if model.editable { Button("Вернуть на телефон") { Task { await model.returnToPhone() } } }
@@ -94,6 +110,7 @@ struct ContentView: View {
         .task(id: scenePhase) {
             guard scenePhase == .active else { return }
             while !Task.isCancelled {
+                await model.companionTick()
                 await model.synchronize()
                 do { try await Task.sleep(for: .seconds(5)) } catch { break }
             }
@@ -103,6 +120,52 @@ struct ContentView: View {
     private var unfinished: Int { model.state.map { s in s.workout.sequence.filter { s.workout.record(at: $0)["status"].string == "draft" }.count } ?? 0 }
     private func action(_ title: String, _ action: @escaping () -> WorkoutAction) -> some View {
         Button(title) { let captured = action(); Task { _ = await model.apply(captured) } }
+    }
+}
+
+private struct WatchHealthView: View {
+    @Bindable var health: WatchHealth
+    let state: WorkoutState
+    @State private var confirmStart = false
+    @State private var confirmClose = false
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 10) {
+                Text(health.status).font(.caption)
+                if !health.enabled {
+                    Button("Включить Apple Health") { Task { await health.authorize(); await health.reconcile(state) } }
+                    Text("Пульс и калории остаются на устройствах. Дневник работает и без доступа к здоровью.").font(.caption2)
+                }
+                if health.enabled, health.activeID == nil, state.workout.active {
+                    Button("Начать измерения") { confirmStart = true }
+                }
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    if let date = health.pulseDate {
+                        Text("Измерение \(Int(max(0, context.date.timeIntervalSince(date)))) с назад").font(.caption2)
+                    }
+                    Text("Длительность: \(Int(health.elapsed / 60)) мин")
+                }
+                Text("Средний пульс: \(health.average.map { String(Int($0)) } ?? "—")")
+                Text("Максимальный: \(health.maximum.map { String(Int($0)) } ?? "—")")
+                Text("Активные ккал: \(health.calories.map { String(Int($0)) } ?? "—")")
+                if health.canPause { Button(health.paused ? "Продолжить тренировку" : "Пауза тренировки") { health.togglePause() } }
+                if health.needsRecovery { Button("Восстановить измерение") { Task { await health.recover() } }.disabled(health.busy) }
+                if health.canCloseUnrecoverable {
+                    Button("Закрыть прерванное измерение", role: .destructive) { confirmClose = true }.disabled(health.busy)
+                }
+                if !state.workout.active || health.canRetryFinish {
+                    Button("Повторить завершение HealthKit") { Task { await health.finish() } }.disabled(health.busy)
+                }
+            }
+        }.navigationTitle("Apple Health")
+        .confirmationDialog("Системное измерение не восстановлено. Сохранение в Apple Health не подтверждено: часть измерений могла не сохраниться. Исходный журнал останется на часах, подходы и записи Apple Health не удалятся. Повторное измерение этой же тренировки не начнётся.", isPresented: $confirmClose, titleVisibility: .visible) {
+            Button("Закрыть без подтверждённой записи", role: .destructive) { Task { await health.closeUnrecoverable() } }
+            Button("Оставить для восстановления", role: .cancel) { }
+        }
+        .confirmationDialog("Убедитесь, что другая тренировка Apple Fitness или другого приложения завершена. Часы поддерживают только одну системную тренировку.", isPresented: $confirmStart, titleVisibility: .visible) {
+            Button("Другой тренировки нет — начать") { Task { await health.confirmStart(state) } }
+            Button("Без измерений", role: .cancel) { }
+        }
     }
 }
 
@@ -166,6 +229,7 @@ private struct FieldEditor: View {
     @State private var value = ""
     @State private var crown: Double = 0
     @State private var previousCrown: Double = 0
+    @State private var manualStep: Int64 = 500
     @State private var error: String?
     @Environment(\.dismiss) private var dismiss
 
@@ -175,8 +239,19 @@ private struct FieldEditor: View {
             Text(title).font(.headline)
             TextField(title, text: $value).accessibilityIdentifier("setField")
             if field != "note" {
+                if field == "weight", exercise["availableGrams"].array.isEmpty, (exercise["stepGrams"].integer ?? 0) <= 0 {
+                    Text("Шаг ввода, кг").font(.caption2)
+                    HStack(spacing: 4) {
+                        ForEach([Int64(500), 1000, 2500], id: \.self) { step in
+                            Button(Workout.formatWeight(step)) { manualStep = step }
+                                .tint(manualStep == step ? .green : .gray)
+                                .accessibilityLabel("Шаг \(Workout.formatWeight(step)) кг")
+                        }
+                    }
+                }
                 HStack {
                 Button("−") { adjust(-1) }
+                    .accessibilityLabel("Уменьшить значение")
                 Text(value.isEmpty ? "—" : value).font(.body.monospacedDigit())
                     .focusable()
                     .digitalCrownRotation($crown, from: -10000, through: 10000, by: 1, sensitivity: .low, isContinuous: false, isHapticFeedbackEnabled: true)
@@ -186,6 +261,7 @@ private struct FieldEditor: View {
                         adjust(direction)
                     }
                 Button("+") { adjust(1) }
+                    .accessibilityLabel("Увеличить значение")
                 }
             }
             if let error { Text(error).font(.caption2).foregroundStyle(.orange) }
@@ -198,7 +274,7 @@ private struct FieldEditor: View {
     }
     private func adjust(_ direction: Int64) {
         do {
-            if field == "weight" { value = try Workout.adjustedWeight(exercise, input: value.isEmpty ? "0" : value, direction: direction) }
+            if field == "weight" { value = try Workout.adjustedWeight(exercise, input: value.isEmpty ? "0" : value, direction: direction, manualStepGrams: manualStep) }
             else {
                 let maximum: Int64 = field == "rir" ? 10 : field == "duration" ? 86400 : 1000
                 let minimum: Int64 = field == "rir" ? 0 : 1
@@ -231,17 +307,17 @@ private extension JSONValue { var selfID: String { self["id"].string ?? "" } }
 
 private struct WatchPairingView: View {
     @Bindable var model: WorkoutModel
-    @State private var code = ""
-    @State private var paired = false
+    @State private var linking = false
     var body: some View {
         ScrollView {
             VStack(spacing: 8) {
             Text("Подключение").font(.headline)
-            Text("На телефоне: Настройки → Синхронизация → Apple Watch → Создать код.").font(.footnote)
-            TextField("Код из 8 цифр", text: $code)
-            Button("Подключить") { Task { paired = await model.pair(code: code); if paired { code = "" } } }
-                .disabled(model.syncing || code.count != 8)
-            if paired { Text("Подключено").foregroundStyle(.green) }
+            Text("На телефоне нажмите «Подключить часы». Здесь ничего вводить не нужно.").font(.footnote)
+            Button(model.connected ? "Подключить заново" : "Подключить") { linking = true }
+                .disabled(model.syncing || model.linking)
+            if model.linking { ProgressView() }
+            if !model.linkLabel.isEmpty { Text(model.linkLabel).font(.headline).foregroundStyle(.green) }
+            if !model.linkStatus.isEmpty { Text(model.linkStatus).font(.footnote) }
             NavigationLink("Адрес сервера") {
                 ScrollView {
                     VStack(spacing: 8) {
@@ -252,6 +328,9 @@ private struct WatchPairingView: View {
             }
             if let error = model.error { Text(error).font(.caption2).foregroundStyle(.orange) }
             }
+        }
+        .task(id: linking) {
+            if linking { await model.linkWithoutCode(); linking = false }
         }
     }
 }

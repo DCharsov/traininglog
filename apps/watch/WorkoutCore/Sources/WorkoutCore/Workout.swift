@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SetLocation: Codable, Equatable, Sendable, Identifiable {
+public struct SetLocation: Codable, Hashable, Sendable, Identifiable {
     public let exerciseID: String
     public let setID: String
     public var id: String { setID }
@@ -148,6 +148,27 @@ public struct Workout: Codable, Equatable, Sendable {
         return true
     }
 
+    /// Edit an already completed historical set without reopening the workout or changing its timing.
+    public mutating func correctHistory(_ location: SetLocation, values: [String: String]) throws {
+        guard json["status"].string == "completed", json["deletedAt"] == .null,
+              sequence.contains(location), record(at: location)["status"].string == "completed" else {
+            throw WorkoutError("Можно исправить только выполненный подход завершённой тренировки.")
+        }
+        let original = json, completedAt = record(at: location)["completedAt"]
+        var edited = self
+        edited.json["status"] = .string("active")
+        try edited.correct(location)
+        for field in ["weight", "reps", "duration", "rir", "note"] {
+            if let value = values[field] { try edited.setField(location, field: field, value: value) }
+        }
+        _ = try edited.complete(location, now: Date())
+        try edited.edit(location) { record, _ in record["completedAt"] = completedAt }
+        edited.json["status"] = original["status"]
+        edited.json["completedAt"] = original["completedAt"]
+        edited.json["restEndsAt"] = original["restEndsAt"]
+        self = edited
+    }
+
     public mutating func correct(_ location: SetLocation) throws {
         try edit(location) { r, _ in
             guard r["status"].string == "completed" else { throw WorkoutError("Нет выполненного подхода для исправления.") }
@@ -204,11 +225,14 @@ public struct Workout: Codable, Equatable, Sendable {
         let fraction = String(format: "%03lld", grams % 1000).replacingOccurrences(of: "0+$", with: "", options: .regularExpression)
         return "\(grams / 1000)" + (fraction.isEmpty ? "" : "," + fraction)
     }
-    public static func adjustedWeight(_ e: JSONValue, input: String, direction: Int64) throws -> String {
+    public static func adjustedWeight(_ e: JSONValue, input: String, direction: Int64, manualStepGrams: Int64? = nil) throws -> String {
+        try WeightProfile.validate(e)
+        guard direction == 1 || direction == -1 else { throw WorkoutError("Неизвестное направление изменения веса.") }
         let current = try parseWeight(input), values = Set(e["availableGrams"].array.compactMap(\.integer)).sorted()
         let next: Int64?
         if !values.isEmpty { next = direction > 0 ? values.first { $0 > current } : values.last { $0 < current } }
         else if let step = e["stepGrams"].integer, step > 0 { next = current + direction * step }
+        else if let step = manualStepGrams, (1...2_000_000).contains(step) { next = max(0, min(2_000_000, current + (direction > 0 ? step : -step))) }
         else { next = nil }
         guard let next, (0...2_000_000).contains(next) else { throw WorkoutError("Нет доступного веса. Введите вручную.") }
         return formatWeight(next)

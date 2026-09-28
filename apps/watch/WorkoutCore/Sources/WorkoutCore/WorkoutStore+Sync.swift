@@ -77,7 +77,7 @@ extension WorkoutStore {
               let epoch = response["control"]["controlEpoch"].integer,
               let control = response["control"]["state"].string, ["watch", "phone"].contains(control) else { throw WorkoutError("Неверное подтверждение сервера. Запрос сохранён для повтора.") }
         sync.baseVersion = version; sync.controlEpoch = epoch; sync.controlState = control
-        if request.method == "PUT" { sync.basePayload = request.body["payload"] }
+        if request.method == "PUT" || request.path == "/watch/v1/reservation/start" { sync.basePayload = request.body["payload"] }
         if request.path == "/watch/v1/handoff/accept", let selected = next.selected {
             if try next.workout.autofill(selected) { next.workout.incrementRevision(); next.localRevision += 1 }
         }

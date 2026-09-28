@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TrainingLog;
 
-public static class WatchApi {
+public static partial class WatchApi {
     static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
     static long Now => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     static string Hash(string text) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(text)));
@@ -60,6 +60,8 @@ public static class WatchApi {
     });
 
     public static void MapWatchApi(this RouteGroupBuilder api) {
+        MapWatchLink(api);
+        MapReservations(api);
         api.MapPost("/watch/pairing", (HttpContext c, Store db) => Locked(c, db, async () => {
             if (!Enabled(c)) return Error(503, "watch_disabled", "Подключение часов пока выключено.");
             var owner = Owner(c);
@@ -149,6 +151,7 @@ public static class WatchApi {
             if (doc.Version != r.BaseVersion) return Results.Json(new { error = "conflict", version = doc.Version, payload = JsonSerializer.Deserialize<JsonElement>(doc.Payload) }, statusCode: 409);
             if (!AllowedDiff(doc.Payload, r.Payload)) return Error(400, "invalid_diff", "Часы могут менять только результаты подходов и отдых.");
             DocumentWriter.Record(db, doc, r.Payload.GetRawText());
+            await DocumentWriter.CompleteReservation(db, device.Owner, id, r.Payload);
             if (r.Payload.GetProperty("status").GetString() == "completed") {
                 control.State = "phone"; control.Epoch++; control.DeviceId = null; control.HandoffId = null;
             }
@@ -206,6 +209,10 @@ public static class WatchApi {
             control.State = "phone"; control.DeviceId = null; control.HandoffId = null;
         } else return Results.NotFound();
         control!.Epoch++;
+        var reservation = await db.WorkoutReservations.FindAsync(owner);
+        if (reservation?.Id == id && reservation.State == "started") {
+            reservation.Generation = generation; reservation.Epoch = control.Epoch; reservation.Version++;
+        }
         DocumentWriter.Record(db, doc, doc.Payload);
         return Receipt(db, owner, r.OperationId, hash, Snapshot(doc, control, generation));
     }

@@ -8,6 +8,7 @@ export function copyDay(program:Program,index:number) {
  if(program.days.length>=30)throw new Error('Не более 30 дней в программе.')
  const day=structuredClone(program.days[index]);if(!day)throw new Error('День не найден.')
  day.id=uid();day.name=(day.name.slice(0,1990)+' — копия')
+ day.archivedAt=null
  day.exercises.forEach(e=>e.id=uid())
  program.days.splice(index+1,0,day)
 }

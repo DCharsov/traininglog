@@ -1,0 +1,18 @@
+[
+  {"name":"add repetition","target":"8–12","mode":"PerDumbbell","stepGrams":2500,"values":[10],"grams":30000,"expected":{"weight":"30","reps":"11","duration":""}},
+  {"name":"first ceiling holds","target":"8–12","mode":"BarbellTotal","stepGrams":2500,"values":[12],"grams":100000,"expected":{"weight":"100","reps":"12","duration":""}},
+  {"name":"confirmed ceiling raises","target":"8–12","mode":"BarbellTotal","stepGrams":2500,"values":[12,12],"grams":100000,"expected":{"weight":"102,5","reps":"11","duration":""}},
+  {"name":"large jump grows reps","target":"15","mode":"PerDumbbell","availableGrams":[10000,12500],"values":[20,20],"grams":10000,"expected":{"weight":"10","reps":"21","duration":""}},
+  {"name":"large jump eventually allowed","target":"15","mode":"PerDumbbell","availableGrams":[10000,12500],"values":[25,24],"grams":10000,"expected":{"weight":"12,5","reps":"14","duration":""}},
+  {"name":"stalled","target":"8–12","mode":"PerDumbbell","availableGrams":[25000,30000,32500],"values":[10,10],"grams":30000,"expected":{"weight":"30","reps":"10","duration":"","note":"Тот же вес — в прошлый раз без прогресса"}},
+  {"name":"step down","target":"8–12","mode":"PerDumbbell","availableGrams":[25000,30000,32500],"values":[10,10,10],"grams":30000,"expected":{"weight":"25","reps":"12","duration":"","note":"Шаг вниз — прогресса не было"}},
+  {"name":"assisted","target":"8–12","mode":"AssistedBodyweight","availableGrams":[20000,25000,30000],"values":[12,12],"grams":30000,"expected":{"weight":"25","reps":"8","duration":""}},
+  {"name":"seconds","target":"30–45","mode":"BodyweightOnly","tracking":"duration","values":[35],"grams":null,"expected":{"weight":"","reps":"","duration":"40"}},
+  {"name":"bodyweight unlimited","target":"∞","mode":"BodyweightOnly","values":[22],"grams":null,"expected":{"weight":"","reps":"23","duration":""}},
+  {"name":"no target repeats","target":"","mode":"BarbellTotal","values":[8],"grams":40000,"expected":{"weight":"40","reps":"8","duration":""}},
+  {"name":"warmup repeats","target":"8–12","mode":"BarbellTotal","kind":"warmup","values":[12],"grams":30000,"expected":{"weight":"30","reps":"12","duration":""}},
+  {"name":"long layoff","target":"8–12","mode":"BarbellTotal","old":true,"values":[12],"grams":30000,"expected":{"weight":"30","reps":"12","duration":"","note":"После перерыва — как в прошлый раз"}},
+  {"name":"skipped confirmation holds","target":"8–12","mode":"BarbellTotal","stepGrams":2500,"skip":true,"values":[12,12],"grams":100000,"expected":{"weight":"100","reps":"12","duration":""}},
+  {"name":"missing historical ordinal","target":"8–12","mode":"BarbellTotal","missing":true,"values":[10],"grams":30000,"expected":null},
+  {"name":"same side only","target":"8–12","mode":"PerDumbbell","unilateral":true,"values":[10],"grams":30000,"expected":{"weight":"30","reps":"11","duration":""}}
+]

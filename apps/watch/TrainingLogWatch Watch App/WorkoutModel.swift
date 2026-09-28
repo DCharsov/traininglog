@@ -7,13 +7,22 @@ import WorkoutCore
 @MainActor @Observable
 final class WorkoutModel {
     var state: WorkoutState?
+    var reservation = ReservationState()
+    private let reservationStore = ReservationStore(directory: URL.applicationSupportDirectory.appendingPathComponent("Workout"))
     var busy = false
     var ready = false
     var error: String?
     var notificationStatus = ""
     var connectionStatus = "Не подключено"
     var connected = false
+    let companionBridge = CompanionBridge()
+    let health = WatchHealth.shared
+    private var companionStarted = false
+    private var companionUpdating = false
     var syncing = false
+    var linking = false
+    var linkLabel = ""
+    var linkStatus = ""
     var endpoint = "https://cleargate.ru/training/api"
     private let store: WorkoutStore
     private let engine: WatchSyncEngine
@@ -36,6 +45,7 @@ final class WorkoutModel {
         defer { busy = false }
         do {
             state = try await store.load(); ready = true
+            reservation = try await reservationStore.load()
             do {
                 credentials = try WatchKeychain.load(); connected = credentials != nil
                 if let credentials { endpoint = credentials.endpoint; connectionStatus = "Подключено" }
@@ -43,8 +53,62 @@ final class WorkoutModel {
                 connectionStatus = error.localizedDescription // Local workouts remain usable if Keychain is temporarily locked.
             }
             await updateNotification()
+            if !companionStarted {
+                companionStarted = true
+                health.onControlChange = { [weak self] in self?.publishCompanionState() }
+                companionBridge.onReceive = { [weak self] _ in Task { await self?.companionTick() } }
+                companionBridge.activate()
+            }
+            publishCompanionState()
+            await health.reconcile(state)
         }
         catch { self.error = error.localizedDescription }
+    }
+    private func publishCompanionState() {
+        var message: JSONValue = .object(["version": .int(1), "kind": .string("watch")])
+        if let id = health.activeID { message["measurementSessionID"] = .string(id) }
+        message["measurementControl"] = health.pauseSnapshot
+        if let credentials { message["deviceId"] = .string(credentials.deviceID) }
+        if reservation.snapshot["state"].string == "ready", !reservation.blocked {
+            message["readyReservationID"] = reservation.snapshot["reservationId"]
+            message["readyReservationEpoch"] = reservation.snapshot["controlEpoch"]
+        }
+        if let state, !state.isDemo { message["sessionId"] = .string(state.workout.id); message["revision"] = .int(state.localRevision); message["control"] = .string(state.sync?.controlState ?? "") }
+        companionBridge.publish(message)
+    }
+    func companionTick() async {
+        guard !companionUpdating, !syncing else { return }
+        let message = companionBridge.incoming
+        guard message["kind"].string == "phone" else { return }
+        companionUpdating = true; defer { companionUpdating = false }
+        do {
+            if let active = health.activeID, message["finishedSessionIDs"].array.contains(.string(active)) { await health.finish() }
+            if message["measurementPauseCommand"] != .null {
+                let command = try JSONDecoder().decode(MeasurementPauseCommand.self, from: JSONEncoder().encode(message["measurementPauseCommand"]))
+                health.applyPause(command)
+            }
+            let incoming = message["credentials"]
+            if let token = incoming["token"].string, let deviceID = incoming["deviceId"].string,
+               let url = incoming["endpoint"].string, let expiresAt = incoming["expiresAt"].integer, deviceID != credentials?.deviceID {
+                _ = try WatchHTTPTransport(endpoint: url, token: token)
+                guard incoming["protocolVersion"].integer == 1, incoming["contractVersion"].integer == 2 else { throw WorkoutError("Обновите приложение iPhone.") }
+                if let state, !state.isDemo, state.sync?.controlState != "phone", state.sync?.recovered != true {
+                    throw WorkoutError("Сначала отправьте сохранённую тренировку прежнего подключения. Данные не заменены.")
+                }
+                let value = WatchCredentials(endpoint: url, deviceID: deviceID, token: token, expiresAt: expiresAt)
+                try WatchKeychain.save(value); credentials = value; endpoint = url; connected = true
+                connectionStatus = "iPhone настроил связь автоматически"; failures = 0; nextAttempt = .distantPast
+            }
+            publishCompanionState()
+            if message["startReservationID"] == reservation.snapshot["reservationId"],
+               message["startReservationEpoch"] == reservation.snapshot["controlEpoch"], message["startReservationID"] != .null {
+                await startReserved()
+            }
+            if let id = message["sessionId"].string, connected,
+               state?.workout.id != id || state?.isDemo == true || state?.sync?.controlState == "phone" || state?.sync?.recovered == true {
+                await receive()
+            }
+        } catch { connectionStatus = error.localizedDescription }
     }
     func demo() async {
         guard ready, !busy else { return }
@@ -55,6 +119,7 @@ final class WorkoutModel {
     }
     func apply(_ action: WorkoutAction) async -> Bool {
         guard ready, !busy else { return false }
+        if case .complete = action, let state, health.pauseBlocksSets(sessionID: state.workout.id) { error = "Сначала продолжите тренировку в разделе «Здоровье»."; return false }
         if case .complete = action {
             guard Date().timeIntervalSince(lastCompletion) > 0.7 else { return false }
             lastCompletion = Date()
@@ -63,6 +128,7 @@ final class WorkoutModel {
         defer { busy = false }
         do {
             state = try await store.apply(action)
+            await health.reconcile(state)
             await updateNotification()
             Task { await synchronize() }
             return true
@@ -102,6 +168,51 @@ final class WorkoutModel {
             return true
         } catch { self.error = error.localizedDescription; return false }
     }
+    func linkWithoutCode() async {
+        guard !linking, !syncing else { return }
+        linking = true; error = nil; linkLabel = ""
+        defer { linking = false }
+        do {
+            let saved = try WatchKeychain.pendingLink()
+            var pending: WatchCredentials
+            if let saved, saved.endpoint == endpoint, saved.deviceID != credentials?.deviceID { pending = saved }
+            else { pending = try WatchKeychain.newLink(endpoint: endpoint); try WatchKeychain.savePendingLink(pending) }
+            let transport = try WatchHTTPTransport(endpoint: pending.endpoint, token: nil)
+            var body: JSONValue = .object(["id": .string(pending.deviceID), "token": .string(pending.token), "name": .string("Apple Watch")])
+            linkStatus = "Ищем телефон…"
+            var response: JSONValue
+            do { response = try await transport.send(WatchRequest(path: "/watch/link/request", method: "POST", body: body)) }
+            catch let failure as WatchHTTPError where failure.response["error"].string == "request_expired" || failure.status == 401 {
+                pending = try WatchKeychain.newLink(endpoint: endpoint); try WatchKeychain.savePendingLink(pending)
+                body = .object(["id": .string(pending.deviceID), "token": .string(pending.token), "name": .string("Apple Watch")])
+                response = try await transport.send(WatchRequest(path: "/watch/link/request", method: "POST", body: body))
+            }
+            linkLabel = response["label"].string ?? ""
+            linkStatus = "На телефоне нажмите «Это мои часы». Сверьте слова на обоих экранах."
+            for _ in 0..<60 {
+                try Task.checkCancellation()
+                if response["state"].string == "approved" {
+                    guard let expires = response["expiresAt"].integer, response["requestId"].string == pending.deviceID,
+                          response["protocolVersion"].integer == 1, response["contractVersion"].integer == 2 else { throw WorkoutError("Некорректное подтверждение подключения.") }
+                    let credentials = WatchCredentials(endpoint: pending.endpoint, deviceID: pending.deviceID, token: pending.token, expiresAt: expires)
+                    try WatchKeychain.save(credentials)
+                    self.credentials = credentials; connected = true; failures = 0; nextAttempt = .distantPast
+                    linkStatus = "Подключено. Можно передавать тренировку."; connectionStatus = linkStatus
+                    return
+                }
+                try await Task.sleep(for: .seconds(2))
+                response = try await transport.send(WatchRequest(path: "/watch/link/status", method: "POST", body: body))
+            }
+            linkStatus = "Время ожидания истекло. Повторите подключение на телефоне."
+        } catch is CancellationError { linkStatus = "Запрос сохранён. Нажмите «Подключить» для продолжения." }
+        catch let failure as WatchHTTPError {
+            switch failure.status {
+            case 409, 410: linkStatus = "На телефоне нажмите «Подключить часы», затем повторите здесь."
+            case 404: linkStatus = "Обновите сервер дневника для подключения без кода."
+            default: linkStatus = failure.localizedDescription
+            }
+        } catch { linkStatus = "Нет связи. Повторите подключение; данные тренировки сохранены." }
+    }
     func receive() async {
         guard let credentials, !syncing else { return }
         syncing = true
@@ -114,14 +225,18 @@ final class WorkoutModel {
         await synchronize(force: true)
     }
     func synchronize(force: Bool = false) async {
-        guard let credentials, !syncing, state?.isDemo == false, force || Date() >= nextAttempt else { return }
+        guard let credentials, !syncing, state?.isDemo != true || companionBridge.incoming["reservationId"] != .null, force || Date() >= nextAttempt else { return }
         syncing = true
         defer { syncing = false }
         do {
             let transport = try WatchHTTPTransport(endpoint: credentials.endpoint, token: credentials.token)
             _ = try await engine.synchronize(using: transport, deviceID: credentials.deviceID)
             state = try await store.load()
+            if companionBridge.incoming["reservationId"] != .null || reservation.snapshot != .null {
+                try await syncReservation(transport: transport)
+            }
             failures = 0; nextAttempt = .distantPast; connectionStatus = "Связь с сервером работает"
+            publishCompanionState()
             await updateNotification()
         } catch {
             if let saved = try? await store.load() { state = saved }
@@ -130,10 +245,57 @@ final class WorkoutModel {
             nextAttempt = Date().addingTimeInterval(delay)
             connectionStatus = (error as? WatchHTTPError)?.errorDescription ?? "Нет сети — записи сохранены на часах"
         }
+        await health.reconcile(state)
     }
     func returnToPhone() async {
         do { state = try await store.requestReturn(); await synchronize(force: true) }
         catch { self.error = error.localizedDescription }
+    }
+    private func syncReservation(transport: WatchHTTPTransport) async throws {
+        if let request = reservation.pending, !reservation.blocked {
+            do { reservation = try await reservationStore.acknowledge(request, snapshot: transport.send(request)) }
+            catch let error as WatchHTTPError {
+                if [400, 409, 426].contains(error.status) { reservation = try await reservationStore.rejectPending() }
+                throw error
+            }
+        }
+        let response = try await transport.send(WatchRequest(path: "/watch/v1/reservation/", method: "GET", body: .null))
+        guard response["reservation"] != .null else { return }
+        reservation = try await reservationStore.accept(response["reservation"])
+        let snapshot = reservation.snapshot
+        if snapshot["state"].string == "preparing", snapshot["phoneReady"].bool, !snapshot["watchReady"].bool, reservation.pending == nil {
+            let request = ReservationStore.command(snapshot, path: "/watch/v1/reservation/ready")
+            reservation = try await reservationStore.prepare(request)
+            reservation = try await reservationStore.acknowledge(request, snapshot: transport.send(request))
+        }
+        publishCompanionState()
+        // The phone command can arrive before the readiness acknowledgement.
+        let command = companionBridge.incoming
+        if reservation.snapshot["state"].string == "ready", !reservation.blocked,
+           command["startReservationID"] != .null,
+           command["startReservationID"] == reservation.snapshot["reservationId"],
+           command["startReservationEpoch"] == reservation.snapshot["controlEpoch"],
+           state?.workout.id != reservation.snapshot["reservationId"].string {
+            await startReserved()
+        }
+    }
+    func startReserved() async {
+        guard !busy, let credentials, !reservation.blocked else { return }
+        busy = true; defer { busy = false }
+        do {
+            state = try await store.startReserved(reservation.snapshot, deviceID: credentials.deviceID)
+            publishCompanionState(); await health.reconcile(state)
+            Task { await self.synchronize(force: true) }
+        } catch { self.error = error.localizedDescription }
+    }
+    func reconcileReservation() async {
+        guard !syncing, let credentials else { return }; syncing = true
+        do {
+            let transport = try WatchHTTPTransport(endpoint: credentials.endpoint, token: credentials.token)
+            let response = try await transport.send(WatchRequest(path: "/watch/v1/reservation/", method: "GET", body: .null))
+            reservation = try await reservationStore.reconcileRejected(serverSnapshot: response["reservation"])
+        } catch { self.error = error.localizedDescription }
+        syncing = false; await synchronize(force: true)
     }
     func recover() async {
         guard let credentials, !syncing else { return }

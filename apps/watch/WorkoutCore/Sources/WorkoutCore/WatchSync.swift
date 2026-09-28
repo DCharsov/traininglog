@@ -65,10 +65,11 @@ public actor WatchSyncEngine {
             guard let request = try await store.prepareRequest(deviceID: deviceID) else { break }
             do {
                 let response = try await transport.send(request)
-                if request.path == "/watch/v1/handoff/accept" {
+                if request.path == "/watch/v1/handoff/accept" || request.path == "/watch/v1/reservation/start" {
                     let current = try await transport.send(WatchRequest(path: "/watch/v1/session", method: "GET", body: .null))
                     let control = current["session"]["control"]
-                    guard current["session"]["sessionId"].string == request.body["sessionId"].string,
+                    let expectedID = request.path == "/watch/v1/reservation/start" ? request.body["reservationId"].string : request.body["sessionId"].string
+                    guard current["session"]["sessionId"].string == expectedID,
                           control["state"].string == "watch", control["deviceId"].string == deviceID,
                           control["controlEpoch"] == response["control"]["controlEpoch"] else {
                         throw WatchHTTPError(status: 409, response: .object(["error": .string("control_changed")]))

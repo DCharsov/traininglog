@@ -1,2 +1,6 @@
 // Personal Team belongs in the ignored local file, never in project.pbxproj.
 #include? "Signing.local.xcconfig"
+CODE_SIGN_ENTITLEMENTS = Config/Health.entitlements
+INFOPLIST_FILE[sdk=watch*] = Config/WatchInfo.plist
+INFOPLIST_KEY_NSHealthShareUsageDescription = TrainingLog показывает пульс, сон и восстановление только на ваших устройствах.
+INFOPLIST_KEY_NSHealthUpdateUsageDescription = TrainingLog сохраняет выполненную силовую тренировку и активную энергию в Apple Health.

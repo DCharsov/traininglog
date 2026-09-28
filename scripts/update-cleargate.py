@@ -5,7 +5,7 @@ old=link.resolve(strict=True)
 assert old.parent==base and link.is_symlink()
 release=base/datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S')
 release.mkdir()
-with tarfile.open('/root/traininglog-deploy/update.tar.gz') as tf:
+with tarfile.open(os.environ.get('TRAININGLOG_WEB_ARCHIVE', '/root/traininglog-deploy/update.tar.gz')) as tf:
     tf.extractall(release, filter='data')
 assert (release/'index.html').is_file() and (release/'sw.js').is_file()
 for asset in (old/'assets').iterdir():

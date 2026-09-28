@@ -359,6 +359,40 @@ namespace api.Migrations
                     b.ToTable("WatchDevices");
                 });
 
+            modelBuilder.Entity("TrainingLog.WatchLinkRequest", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Approved")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("ExpiresAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Owner")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Owner", "ExpiresAt");
+
+                    b.ToTable("WatchLinkRequests");
+                });
+
             modelBuilder.Entity("TrainingLog.WatchPairing", b =>
                 {
                     b.Property<string>("Hash")
@@ -408,6 +442,54 @@ namespace api.Migrations
                     b.HasIndex("Owner", "SessionId");
 
                     b.ToTable("WatchRecoveries");
+                });
+
+            modelBuilder.Entity("TrainingLog.WorkoutReservation", b =>
+                {
+                    b.Property<string>("Owner")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DeviceId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("Epoch")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Generation")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("PhoneReady")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("WatchReady")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Owner");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.ToTable("WorkoutReservations");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

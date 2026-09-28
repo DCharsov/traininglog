@@ -1,5 +1,7 @@
 import type { Program, Session } from './domain'
 export function nextDay(program:Program,sessions:Session[]) {
+ program={...program,days:program.days.filter(d=>!d.archivedAt)}
+ if(!program.days.length)throw new Error('Нет доступных дней программы.')
  const recent=sessions.filter(s=>!s.deletedAt&&s.programId===program.id&&s.status==='completed'&&program.days.some(d=>d.id===s.dayId)).sort((a,b)=>b.startedAt.localeCompare(a.startedAt)||b.id.localeCompare(a.id))[0]
  const index=recent?program.days.findIndex(d=>d.id===recent.dayId):-1
  return {day:program.days[(index+1)%program.days.length],previous:recent}

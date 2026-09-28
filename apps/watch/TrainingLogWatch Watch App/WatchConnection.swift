@@ -33,7 +33,32 @@ enum WatchKeychain {
             create[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
             status = SecItemAdd(create as CFDictionary, nil)
         }
-        guard status == errSecSuccess else { throw WorkoutError("Не удалось сохранить подключение (\(status)). Создайте новый код; тренировка сохранена.") }
+        guard status == errSecSuccess else { throw WorkoutError("Не удалось сохранить подключение (\(status)). Повторите подключение; тренировка сохранена.") }
+    }
+    static func pendingLink() throws -> WatchCredentials? {
+        var lookup = query; lookup[kSecAttrAccount as String] = "watch-pending-link-v1"
+        lookup[kSecReturnData as String] = true; lookup[kSecMatchLimit as String] = kSecMatchLimitOne
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(lookup as CFDictionary, &result)
+        if status == errSecItemNotFound { return nil }
+        guard status == errSecSuccess, let data = result as? Data else { throw WorkoutError("Не удалось открыть запрос подключения.") }
+        return try JSONDecoder().decode(WatchCredentials.self, from: data)
+    }
+    static func savePendingLink(_ credentials: WatchCredentials) throws {
+        var key = query; key[kSecAttrAccount as String] = "watch-pending-link-v1"
+        let data = try JSONEncoder().encode(credentials)
+        var status = SecItemUpdate(key as CFDictionary, [kSecValueData as String: data] as CFDictionary)
+        if status == errSecItemNotFound {
+            key[kSecValueData as String] = data
+            key[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+            status = SecItemAdd(key as CFDictionary, nil)
+        }
+        guard status == errSecSuccess else { throw WorkoutError("Не удалось сохранить запрос подключения.") }
+    }
+    static func newLink(endpoint: String) throws -> WatchCredentials {
+        var bytes = [UInt8](repeating: 0, count: 32)
+        guard SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes) == errSecSuccess else { throw WorkoutError("Не удалось создать безопасное подключение.") }
+        return WatchCredentials(endpoint: endpoint, deviceID: UUID().uuidString, token: bytes.map { String(format: "%02X", $0) }.joined(), expiresAt: Workout.milliseconds(Date()) + 120_000)
     }
 }
 

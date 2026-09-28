@@ -55,6 +55,15 @@
               }
             ]
           },
+          "seedKey": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "contentRevision": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
           "id": {
             "type": "string",
             "format": "uuid",
@@ -91,6 +100,18 @@
                   "minLength": 1,
                   "maxLength": 2000
                 },
+                "archivedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "exercises": {
                   "minItems": 1,
                   "maxItems": 50,
@@ -98,6 +119,28 @@
                   "items": {
                     "type": "object",
                     "properties": {
+                      "muscle": {
+                        "type": "string",
+                        "enum": [
+                          "chest",
+                          "back",
+                          "shoulders",
+                          "biceps",
+                          "triceps",
+                          "forearms",
+                          "quads",
+                          "hamstrings",
+                          "glutes",
+                          "calves",
+                          "abs"
+                        ]
+                      },
+                      "optionalWeekly": {
+                        "type": "boolean"
+                      },
+                      "requiresEquipment": {
+                        "type": "boolean"
+                      },
                       "tracking": {
                         "type": "string",
                         "enum": [
@@ -172,11 +215,11 @@
                           "BarbellTotal",
                           "SmithPlatesOnly",
                           "PerDumbbell",
+                          "MachinePlatesOnly",
                           "MachineStack",
                           "AddedBodyweight",
                           "AssistedBodyweight",
-                          "BodyweightOnly",
-                          "MachinePlatesOnly"
+                          "BodyweightOnly"
                         ]
                       },
                       "sets": {
@@ -203,12 +246,6 @@
                       "sourceNote": {
                         "type": "string",
                         "maxLength": 2000
-                      },
-                      "optionalWeekly": {
-                        "type": "boolean"
-                      },
-                      "requiresEquipment": {
-                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -233,14 +270,6 @@
               ],
               "additionalProperties": false
             }
-          },
-          "seedKey": {
-            "type": "string",
-            "maxLength": 2000
-          },
-          "contentRevision": {
-            "type": "integer",
-            "minimum": 1
           }
         },
         "required": [
@@ -350,6 +379,28 @@
             "items": {
               "type": "object",
               "properties": {
+                "muscle": {
+                  "type": "string",
+                  "enum": [
+                    "chest",
+                    "back",
+                    "shoulders",
+                    "biceps",
+                    "triceps",
+                    "forearms",
+                    "quads",
+                    "hamstrings",
+                    "glutes",
+                    "calves",
+                    "abs"
+                  ]
+                },
+                "optionalWeekly": {
+                  "type": "boolean"
+                },
+                "requiresEquipment": {
+                  "type": "boolean"
+                },
                 "tracking": {
                   "type": "string",
                   "enum": [
@@ -424,11 +475,11 @@
                     "BarbellTotal",
                     "SmithPlatesOnly",
                     "PerDumbbell",
+                    "MachinePlatesOnly",
                     "MachineStack",
                     "AddedBodyweight",
                     "AssistedBodyweight",
-                    "BodyweightOnly",
-                    "MachinePlatesOnly"
+                    "BodyweightOnly"
                   ]
                 },
                 "sets": {
@@ -567,12 +618,6 @@
                     ],
                     "additionalProperties": false
                   }
-                },
-                "optionalWeekly": {
-                  "type": "boolean"
-                },
-                "requiresEquipment": {
-                  "type": "boolean"
                 }
               },
               "required": [
@@ -628,11 +673,11 @@
               "BarbellTotal",
               "SmithPlatesOnly",
               "PerDumbbell",
+              "MachinePlatesOnly",
               "MachineStack",
               "AddedBodyweight",
               "AssistedBodyweight",
-              "BodyweightOnly",
-              "MachinePlatesOnly"
+              "BodyweightOnly"
             ]
           },
           "stepGrams": {
@@ -783,11 +828,11 @@
                     "BarbellTotal",
                     "SmithPlatesOnly",
                     "PerDumbbell",
+                    "MachinePlatesOnly",
                     "MachineStack",
                     "AddedBodyweight",
                     "AssistedBodyweight",
-                    "BodyweightOnly",
-                    "MachinePlatesOnly"
+                    "BodyweightOnly"
                   ]
                 },
                 "stepGrams": {
@@ -938,6 +983,15 @@
                     }
                   ]
                 },
+                "seedKey": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "contentRevision": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
                 "id": {
                   "type": "string",
                   "format": "uuid",
@@ -974,6 +1028,18 @@
                         "minLength": 1,
                         "maxLength": 2000
                       },
+                      "archivedAt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
                       "exercises": {
                         "minItems": 1,
                         "maxItems": 50,
@@ -981,6 +1047,28 @@
                         "items": {
                           "type": "object",
                           "properties": {
+                            "muscle": {
+                              "type": "string",
+                              "enum": [
+                                "chest",
+                                "back",
+                                "shoulders",
+                                "biceps",
+                                "triceps",
+                                "forearms",
+                                "quads",
+                                "hamstrings",
+                                "glutes",
+                                "calves",
+                                "abs"
+                              ]
+                            },
+                            "optionalWeekly": {
+                              "type": "boolean"
+                            },
+                            "requiresEquipment": {
+                              "type": "boolean"
+                            },
                             "tracking": {
                               "type": "string",
                               "enum": [
@@ -1055,11 +1143,11 @@
                                 "BarbellTotal",
                                 "SmithPlatesOnly",
                                 "PerDumbbell",
+                                "MachinePlatesOnly",
                                 "MachineStack",
                                 "AddedBodyweight",
                                 "AssistedBodyweight",
-                                "BodyweightOnly",
-                                "MachinePlatesOnly"
+                                "BodyweightOnly"
                               ]
                             },
                             "sets": {
@@ -1086,12 +1174,6 @@
                             "sourceNote": {
                               "type": "string",
                               "maxLength": 2000
-                            },
-                            "optionalWeekly": {
-                              "type": "boolean"
-                            },
-                            "requiresEquipment": {
-                              "type": "boolean"
                             }
                           },
                           "required": [
@@ -1116,14 +1198,6 @@
                     ],
                     "additionalProperties": false
                   }
-                },
-                "seedKey": {
-                  "type": "string",
-                  "maxLength": 2000
-                },
-                "contentRevision": {
-                  "type": "integer",
-                  "minimum": 1
                 }
               },
               "required": [
@@ -1237,6 +1311,28 @@
                   "items": {
                     "type": "object",
                     "properties": {
+                      "muscle": {
+                        "type": "string",
+                        "enum": [
+                          "chest",
+                          "back",
+                          "shoulders",
+                          "biceps",
+                          "triceps",
+                          "forearms",
+                          "quads",
+                          "hamstrings",
+                          "glutes",
+                          "calves",
+                          "abs"
+                        ]
+                      },
+                      "optionalWeekly": {
+                        "type": "boolean"
+                      },
+                      "requiresEquipment": {
+                        "type": "boolean"
+                      },
                       "tracking": {
                         "type": "string",
                         "enum": [
@@ -1311,11 +1407,11 @@
                           "BarbellTotal",
                           "SmithPlatesOnly",
                           "PerDumbbell",
+                          "MachinePlatesOnly",
                           "MachineStack",
                           "AddedBodyweight",
                           "AssistedBodyweight",
-                          "BodyweightOnly",
-                          "MachinePlatesOnly"
+                          "BodyweightOnly"
                         ]
                       },
                       "sets": {
@@ -1454,12 +1550,6 @@
                           ],
                           "additionalProperties": false
                         }
-                      },
-                      "optionalWeekly": {
-                        "type": "boolean"
-                      },
-                      "requiresEquipment": {
-                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -1540,6 +1630,10 @@
             "type": "string"
           },
           "watchProtocolVersion": {
+            "type": "integer",
+            "const": 1
+          },
+          "watchReservationsVersion": {
             "type": "integer",
             "const": 1
           }
@@ -1767,6 +1861,86 @@
           "cursor",
           "hasMore"
         ]
+      },
+      "WatchLinkStart": {
+        "type": "object",
+        "required": [
+          "id",
+          "token",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "token": {
+            "type": "string",
+            "pattern": "^[A-Fa-f0-9]{64}$",
+            "description": "Client-generated 256-bit secret, saved in Keychain before the request. Never put in a URL."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      },
+      "WatchLinkPoll": {
+        "type": "object",
+        "required": [
+          "id",
+          "token"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "token": {
+            "type": "string",
+            "pattern": "^[A-Fa-f0-9]{64}$"
+          }
+        }
+      },
+      "WatchLinkState": {
+        "type": "object",
+        "required": [
+          "requestId",
+          "label",
+          "expiresAt",
+          "state",
+          "protocolVersion",
+          "contractVersion"
+        ],
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved"
+            ]
+          },
+          "protocolVersion": {
+            "type": "integer",
+            "const": 1
+          },
+          "contractVersion": {
+            "type": "integer",
+            "const": 2
+          }
+        }
       },
       "WatchControl": {
         "type": "object",
@@ -2090,6 +2264,167 @@
           "deviceId",
           "createdAt"
         ]
+      },
+      "ReservationCreate": {
+        "type": "object",
+        "required": [
+          "operationId",
+          "generation",
+          "deviceId",
+          "payload"
+        ],
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "generation": {
+            "type": "string"
+          },
+          "deviceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/Session"
+          }
+        }
+      },
+      "ReservationCommand": {
+        "type": "object",
+        "required": [
+          "operationId",
+          "generation",
+          "reservationId",
+          "version",
+          "controlEpoch"
+        ],
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "generation": {
+            "type": "string"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "controlEpoch": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          }
+        }
+      },
+      "ReservationStart": {
+        "type": "object",
+        "required": [
+          "operationId",
+          "generation",
+          "reservationId",
+          "version",
+          "controlEpoch",
+          "payload"
+        ],
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "generation": {
+            "type": "string"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "controlEpoch": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "payload": {
+            "$ref": "#/components/schemas/Session"
+          }
+        }
+      },
+      "ReservationSnapshot": {
+        "type": "object",
+        "required": [
+          "reservationId",
+          "deviceId",
+          "generation",
+          "version",
+          "controlEpoch",
+          "state",
+          "phoneReady",
+          "watchReady",
+          "payload",
+          "protocolVersion",
+          "contractVersion"
+        ],
+        "properties": {
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "deviceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "generation": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "controlEpoch": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "preparing",
+              "ready",
+              "started",
+              "cancelled",
+              "completed"
+            ]
+          },
+          "phoneReady": {
+            "type": "boolean"
+          },
+          "watchReady": {
+            "type": "boolean"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/Session"
+          },
+          "protocolVersion": {
+            "type": "integer",
+            "const": 1
+          },
+          "contractVersion": {
+            "type": "integer",
+            "const": 2
+          }
+        }
       }
     }
   },
@@ -2166,6 +2501,16 @@
               }
             }
           },
+          "423": {
+            "description": "Ошибка 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "426": {
             "description": "Ошибка 426",
             "content": {
@@ -2188,6 +2533,16 @@
           },
           "500": {
             "description": "Ошибка 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка 503",
             "content": {
               "application/json": {
                 "schema": {
@@ -2264,6 +2619,16 @@
               }
             }
           },
+          "423": {
+            "description": "Ошибка 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "426": {
             "description": "Ошибка 426",
             "content": {
@@ -2286,6 +2651,16 @@
           },
           "500": {
             "description": "Ошибка 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка 503",
             "content": {
               "application/json": {
                 "schema": {
@@ -2360,6 +2735,16 @@
               }
             }
           },
+          "423": {
+            "description": "Ошибка 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "426": {
             "description": "Ошибка 426",
             "content": {
@@ -2382,6 +2767,16 @@
           },
           "500": {
             "description": "Ошибка 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка 503",
             "content": {
               "application/json": {
                 "schema": {
@@ -2484,6 +2879,16 @@
               }
             }
           },
+          "423": {
+            "description": "Ошибка 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "426": {
             "description": "Ошибка 426",
             "content": {
@@ -2506,6 +2911,16 @@
           },
           "500": {
             "description": "Ошибка 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка 503",
             "content": {
               "application/json": {
                 "schema": {
@@ -2589,6 +3004,16 @@
               }
             }
           },
+          "423": {
+            "description": "Ошибка 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "426": {
             "description": "Ошибка 426",
             "content": {
@@ -2611,6 +3036,16 @@
           },
           "500": {
             "description": "Ошибка 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка 503",
             "content": {
               "application/json": {
                 "schema": {
@@ -2718,6 +3153,16 @@
               }
             }
           },
+          "423": {
+            "description": "Ошибка 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "426": {
             "description": "Ошибка 426",
             "content": {
@@ -2740,6 +3185,16 @@
           },
           "500": {
             "description": "Ошибка 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка 503",
             "content": {
               "application/json": {
                 "schema": {
@@ -2815,6 +3270,16 @@
               }
             }
           },
+          "423": {
+            "description": "Ошибка 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "426": {
             "description": "Ошибка 426",
             "content": {
@@ -2837,6 +3302,16 @@
           },
           "500": {
             "description": "Ошибка 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка 503",
             "content": {
               "application/json": {
                 "schema": {
@@ -2931,6 +3406,16 @@
               }
             }
           },
+          "423": {
+            "description": "Ошибка 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "426": {
             "description": "Ошибка 426",
             "content": {
@@ -2953,6 +3438,16 @@
           },
           "500": {
             "description": "Ошибка 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка 503",
             "content": {
               "application/json": {
                 "schema": {
@@ -3028,6 +3523,16 @@
               }
             }
           },
+          "423": {
+            "description": "Ошибка 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "426": {
             "description": "Ошибка 426",
             "content": {
@@ -3050,6 +3555,16 @@
           },
           "500": {
             "description": "Ошибка 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка 503",
             "content": {
               "application/json": {
                 "schema": {
@@ -3145,6 +3660,16 @@
               }
             }
           },
+          "423": {
+            "description": "Ошибка 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "426": {
             "description": "Ошибка 426",
             "content": {
@@ -3167,6 +3692,16 @@
           },
           "500": {
             "description": "Ошибка 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка 503",
             "content": {
               "application/json": {
                 "schema": {
@@ -3259,6 +3794,16 @@
               }
             }
           },
+          "423": {
+            "description": "Ошибка 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "426": {
             "description": "Ошибка 426",
             "content": {
@@ -3281,6 +3826,16 @@
           },
           "500": {
             "description": "Ошибка 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Ошибка 503",
             "content": {
               "application/json": {
                 "schema": {
@@ -3327,6 +3882,242 @@
             }
           }
         }
+      }
+    },
+    "/watch/link/window": {
+      "post": {
+        "summary": "Open a 120-second owner-authorized discovery window. Requires cookie and CSRF. Replaces unapproved requests.",
+        "responses": {
+          "200": {
+            "description": "Window opened",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "expiresAt"
+                  ],
+                  "properties": {
+                    "expiresAt": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "CSRF validation failed"
+          },
+          "401": {
+            "description": "Owner login required"
+          },
+          "429": {
+            "description": "Rate limited"
+          },
+          "503": {
+            "description": "Watch feature disabled"
+          }
+        },
+        "operationId": "postWatchLinkWindow",
+        "parameters": [
+          {
+            "name": "X-CSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/watch/link/request": {
+      "post": {
+        "summary": "Request connection during an open window; identical id/secret retries retain the request. Does not grant access until phone approval.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchLinkStart"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchLinkState"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Previously approved device was revoked"
+          },
+          "409": {
+            "description": "Window closed or request expired/reused"
+          },
+          "429": {
+            "description": "Rate limited or three pending requests already exist"
+          },
+          "503": {
+            "description": "Disabled"
+          }
+        },
+        "operationId": "postWatchLinkRequest"
+      }
+    },
+    "/watch/link/requests": {
+      "get": {
+        "summary": "List only this owner's unapproved requests. Compare the label shown on the physical watch before approving.",
+        "responses": {
+          "200": {
+            "description": "Pending requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "name",
+                      "label",
+                      "expiresAt"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "expiresAt": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Owner login required"
+          }
+        },
+        "operationId": "getWatchLinkRequests"
+      }
+    },
+    "/watch/link/requests/{id}/approve": {
+      "post": {
+        "summary": "Explicitly approve matching physical watch. Requires owner cookie/CSRF. Idempotent; closes discovery and discards other unapproved requests.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-CSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Approved; the previously generated secret now authenticates this device",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "approved"
+                  ],
+                  "properties": {
+                    "approved": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "CSRF validation failed"
+          },
+          "401": {
+            "description": "Owner login required"
+          },
+          "409": {
+            "description": "Request expired, foreign or device limit reached"
+          },
+          "503": {
+            "description": "Disabled"
+          }
+        },
+        "operationId": "postWatchLinkRequestsIdApprove"
+      }
+    },
+    "/watch/link/status": {
+      "post": {
+        "summary": "Poll with the persisted secret every two seconds. Approved requests remain recoverable after a lost response; revoked devices cannot reconnect this way.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchLinkPoll"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request state; expiresAt becomes the 90-day token expiry upon approval",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchLinkState"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Revoked device"
+          },
+          "410": {
+            "description": "Unknown, expired or incorrect-secret request"
+          },
+          "429": {
+            "description": "Poll rate limited"
+          }
+        },
+        "operationId": "postWatchLinkStatus"
       }
     },
     "/watch/pairing": {
@@ -3381,7 +4172,8 @@
           "503": {
             "description": "New watch pairing or handoff is disabled; existing control remains enforced."
           }
-        }
+        },
+        "operationId": "postWatchPairing"
       }
     },
     "/watch/pairing/redeem": {
@@ -3432,7 +4224,8 @@
           "503": {
             "description": "New watch pairing or handoff is disabled; existing control remains enforced."
           }
-        }
+        },
+        "operationId": "postWatchPairingRedeem"
       }
     },
     "/watch/devices": {
@@ -3492,7 +4285,8 @@
           "503": {
             "description": "New watch pairing or handoff is disabled; existing control remains enforced."
           }
-        }
+        },
+        "operationId": "getWatchDevices"
       }
     },
     "/watch/devices/{id}": {
@@ -3564,7 +4358,8 @@
           "503": {
             "description": "New watch pairing or handoff is disabled; existing control remains enforced."
           }
-        }
+        },
+        "operationId": "deleteWatchDevicesId"
       }
     },
     "/sessions/{id}/watch-control": {
@@ -3620,7 +4415,8 @@
           "503": {
             "description": "New watch pairing or handoff is disabled; existing control remains enforced."
           }
-        }
+        },
+        "operationId": "getSessionsIdWatchControl"
       }
     },
     "/sessions/{id}/watch-handoff": {
@@ -3694,7 +4490,8 @@
           "503": {
             "description": "New watch pairing or handoff is disabled; existing control remains enforced."
           }
-        }
+        },
+        "operationId": "postSessionsIdWatchHandoff"
       }
     },
     "/sessions/{id}/watch-handoff/cancel": {
@@ -3768,7 +4565,8 @@
           "503": {
             "description": "New watch pairing or handoff is disabled; existing control remains enforced."
           }
-        }
+        },
+        "operationId": "postSessionsIdWatchHandoffCancel"
       }
     },
     "/sessions/{id}/watch-force-return": {
@@ -3842,7 +4640,8 @@
           "503": {
             "description": "New watch pairing or handoff is disabled; existing control remains enforced."
           }
-        }
+        },
+        "operationId": "postSessionsIdWatchForceReturn"
       }
     },
     "/watch/recovery": {
@@ -3890,7 +4689,8 @@
           "503": {
             "description": "New watch pairing or handoff is disabled; existing control remains enforced."
           }
-        }
+        },
+        "operationId": "getWatchRecovery"
       }
     },
     "/watch/recovery/{id}": {
@@ -3970,7 +4770,8 @@
           "503": {
             "description": "New watch pairing or handoff is disabled; existing control remains enforced."
           }
-        }
+        },
+        "operationId": "getWatchRecoveryId"
       }
     },
     "/watch/v1/session": {
@@ -4040,7 +4841,8 @@
           "503": {
             "description": "New watch pairing or handoff is disabled; existing control remains enforced."
           }
-        }
+        },
+        "operationId": "getWatchV1Session"
       }
     },
     "/watch/v1/handoff/accept": {
@@ -4095,7 +4897,8 @@
           "503": {
             "description": "New watch pairing or handoff is disabled; existing control remains enforced."
           }
-        }
+        },
+        "operationId": "postWatchV1HandoffAccept"
       }
     },
     "/watch/v1/control/release": {
@@ -4150,7 +4953,8 @@
           "503": {
             "description": "New watch pairing or handoff is disabled; existing control remains enforced."
           }
-        }
+        },
+        "operationId": "postWatchV1ControlRelease"
       }
     },
     "/watch/v1/sessions/{id}": {
@@ -4216,7 +5020,8 @@
           "503": {
             "description": "New watch pairing or handoff is disabled; existing control remains enforced."
           }
-        }
+        },
+        "operationId": "putWatchV1SessionsId"
       }
     },
     "/watch/v1/recovery": {
@@ -4279,6 +5084,910 @@
           },
           "503": {
             "description": "New watch pairing or handoff is disabled; existing control remains enforced."
+          }
+        },
+        "operationId": "postWatchV1Recovery"
+      }
+    },
+    "/watch/reservation": {
+      "get": {
+        "operationId": "readReservation",
+        "description": "One reservation per owner. No expiry. Not a Session until explicitly started.",
+        "security": [
+          {
+            "ownerCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful idempotent receipt or current snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "enabled",
+                    "reservation"
+                  ],
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "reservation": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/ReservationSnapshot"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Generation/version/epoch changed; preserve local data and reconcile, do not blindly retry with a new operationId",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Error 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "Error 426",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createReservation",
+        "description": "Requires Watch:ReservationsEnabled. A pristine Session template is reserved, but no Session/history/timer is created. Old clients cannot start a competing workout. All writes use the shared transaction gate.",
+        "security": [
+          {
+            "ownerCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationCreate"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-CSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful idempotent receipt or current snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Generation/version/epoch changed; preserve local data and reconcile, do not blindly retry with a new operationId",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Error 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "Error 426",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/watch/reservation/phone-ready": {
+      "post": {
+        "operationId": "confirmPhoneReservation",
+        "description": "Call only after the snapshot is durably saved on iPhone. Readiness requires both devices.",
+        "security": [
+          {
+            "ownerCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationCommand"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-CSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful idempotent receipt or current snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Generation/version/epoch changed; preserve local data and reconcile, do not blindly retry with a new operationId",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Error 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "Error 426",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/watch/reservation/force-cancel": {
+      "post": {
+        "operationId": "cancelReservation",
+        "description": "Explicit warning required: watch may have started offline. Raises controlEpoch. Late results must use /watch/v1/recovery, never overwrite current history.",
+        "security": [
+          {
+            "ownerCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationCommand"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "X-CSRF-TOKEN",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful idempotent receipt or current snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Generation/version/epoch changed; preserve local data and reconcile, do not blindly retry with a new operationId",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Error 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "Error 426",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/watch/v1/reservation/": {
+      "get": {
+        "operationId": "readWatchReservation",
+        "description": "Returns only the authenticated device’s assigned reservation.",
+        "security": [
+          {
+            "watchBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful idempotent receipt or current snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "reservation"
+                  ],
+                  "properties": {
+                    "reservation": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/ReservationSnapshot"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Generation/version/epoch changed; preserve local data and reconcile, do not blindly retry with a new operationId",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Error 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "Error 426",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/watch/v1/reservation/ready": {
+      "post": {
+        "operationId": "confirmWatchReservation",
+        "description": "Call only after atomic local persistence. A ready snapshot permits offline start by the sole watch editor.",
+        "security": [
+          {
+            "watchBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful idempotent receipt or current snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Generation/version/epoch changed; preserve local data and reconcile, do not blindly retry with a new operationId",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Error 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "Error 426",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/watch/v1/reservation/start": {
+      "post": {
+        "operationId": "startReservation",
+        "description": "Upload immutable offline start. Actual startedAt/localDate/timezone replace preparation placeholders. Requires ready state, matching generation/version/epoch and assigned device. Replay does not prove current ownership: fetch /watch/v1/session before continuing sync. Completion uses the existing watch write protocol.",
+        "security": [
+          {
+            "watchBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationStart"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful idempotent receipt or current snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Generation/version/epoch changed; preserve local data and reconcile, do not blindly retry with a new operationId",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "Error 423",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "426": {
+            "description": "Error 426",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
