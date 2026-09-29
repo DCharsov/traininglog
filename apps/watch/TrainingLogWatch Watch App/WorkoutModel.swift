@@ -13,6 +13,7 @@ final class WorkoutModel {
     var ready = false
     var error: String?
     var notificationStatus = ""
+    var notificationPermission: UNAuthorizationStatus?
     var connectionStatus = "Не подключено"
     var connected = false
     let companionBridge = CompanionBridge()
@@ -138,9 +139,13 @@ final class WorkoutModel {
         do {
             let granted = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
             notificationStatus = granted ? "Уведомления разрешены" : "Без уведомлений — запись подходов работает"
+            await refreshNotificationPermission()
             scheduledEnd = nil
             await updateNotification()
         } catch { notificationStatus = error.localizedDescription }
+    }
+    func refreshNotificationPermission() async {
+        notificationPermission = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
     }
     var editable: Bool { state?.isDemo == true || (state?.sync?.controlState == "watch" && state?.sync?.returning == false && state?.sync?.conflict == nil) }
     var deliveryStatus: String {

@@ -24,14 +24,6 @@ struct ContentView: View {
                         Button("Начать подготовленную") { Task { await model.startReserved() } }.disabled(model.busy || model.reservation.blocked)
                     }
                     if let state = model.state {
-                        if !state.isDemo {
-                            NavigationLink { WatchHealthView(health: model.health, state: state) } label: {
-                                TimelineView(.periodic(from: .now, by: 1)) { context in
-                                    let fresh = model.health.pulse != nil && (model.health.pulseDate.map { (0..<30).contains(context.date.timeIntervalSince($0)) } ?? false)
-                                    Text(fresh ? "♥ \(Int(model.health.pulse ?? 0)) уд/мин" : "♥ — · Здоровье").foregroundStyle(.red)
-                                }
-                            }
-                        }
                         if state.workout.active && model.editable {
                             if let end = state.workout.restEndsAt {
                                 TimelineView(.periodic(from: .now, by: 1)) { context in
@@ -53,12 +45,6 @@ struct ContentView: View {
                             } else {
                                 Text("Все подходы записаны").font(.headline)
                             }
-                            NavigationLink("Упражнения") { ExercisePicker(model: model) }
-                            if let last = state.workout.sequence.filter({ state.workout.record(at: $0)["status"].string == "completed" }).max(by: {
-                                (state.workout.record(at: $0)["completedAt"].string ?? "") < (state.workout.record(at: $1)["completedAt"].string ?? "")
-                            }) {
-                                action("Исправить последний") { .correct(last) }
-                            }
                             Button("Завершить тренировку") { finishing = true }.tint(.orange)
                         } else if !state.workout.active {
                             Text("Тренировка завершена").font(.headline)
@@ -66,28 +52,15 @@ struct ContentView: View {
                         } else {
                             Text(model.deliveryStatus).font(.headline)
                         }
-                        Text(model.deliveryStatus).font(.caption2).foregroundStyle(.green)
                         if state.isDemo { Text("Демо не отправляется в ваш дневник.").font(.caption2).foregroundStyle(.secondary) }
                     } else if model.ready {
                         Text("TrainingLog").font(.title2.bold())
                         Text("Тренировки на часах").font(.headline)
                         Text("Начните тренировку в TrainingLog на iPhone — она появится здесь автоматически.").font(.footnote)
-                        Button("Открыть демо") { Task { await model.demo() } }
                     } else {
                         Text("Загрузка локальных данных…")
                     }
-                    Text(model.companionBridge.status).font(.caption2).foregroundStyle(.secondary)
-                    if model.connected {
-                        if model.state?.isDemo == false {
-                            Button("Отправить записи") { Task { await model.synchronize(force: true) } }.disabled(model.syncing)
-                            if model.editable { Button("Вернуть на телефон") { Task { await model.returnToPhone() } } }
-                            Button("Сохранить копию на сервере") { Task { await model.recover() } }.disabled(model.syncing)
-                        }
-                        Text(model.connectionStatus).font(.caption2)
-                    }
-                    Button("Разрешить уведомления") { Task { await model.enableNotifications() } }.font(.caption)
-                    if !model.notificationStatus.isEmpty { Text(model.notificationStatus).font(.caption2) }
-                    NavigationLink("Проверка установки") { InstallationProbeView() }.font(.caption)
+                    NavigationLink("Ещё") { WatchMoreView(model: model) }.font(.caption)
                 }.padding(.horizontal, 5)
             }
             .disabled(model.busy)
@@ -109,6 +82,7 @@ struct ContentView: View {
         }
         .task(id: scenePhase) {
             guard scenePhase == .active else { return }
+            await model.refreshNotificationPermission()
             while !Task.isCancelled {
                 await model.companionTick()
                 await model.synchronize()
@@ -123,49 +97,67 @@ struct ContentView: View {
     }
 }
 
+private struct WatchMoreView: View {
+    @Bindable var model: WorkoutModel
+    var body: some View {
+        List {
+            if let state = model.state {
+                Text(model.deliveryStatus).font(.caption).foregroundStyle(.secondary)
+                if state.workout.active, model.editable {
+                    NavigationLink("Выбрать упражнение") { ExercisePicker(model: model) }
+                    if let last = state.workout.sequence.filter({ state.workout.record(at: $0)["status"].string == "completed" }).max(by: {
+                        (state.workout.record(at: $0)["completedAt"].string ?? "") < (state.workout.record(at: $1)["completedAt"].string ?? "")
+                    }) {
+                        Button("Исправить последний подход") { Task { _ = await model.apply(.correct(last)) } }
+                    }
+                    if model.connected, !state.isDemo {
+                        Button("Вернуть на телефон") { Task { await model.returnToPhone() } }
+                    }
+                }
+                if !state.isDemo, model.connected {
+                    Button("Повторить отправку") { Task { await model.synchronize(force: true) } }.disabled(model.syncing)
+                    if state.sync?.conflict != nil {
+                        Button("Сохранить восстановительную копию") { Task { await model.recover() } }.disabled(model.syncing)
+                    }
+                }
+                if model.health.needsRecovery {
+                    NavigationLink("Прежнее измерение") { WatchHealthView(health: model.health, state: state) }
+                }
+            }
+            Section("Уведомления об отдыхе") {
+                if model.notificationPermission == .notDetermined {
+                    Button("Разрешить уведомления") { Task { await model.enableNotifications() } }
+                } else if model.notificationPermission == .denied {
+                    Text("Выключены в системных настройках. Запись подходов работает.").font(.caption)
+                } else if model.notificationPermission != nil {
+                    Text("Включены").font(.caption).foregroundStyle(.secondary)
+                }
+                if !model.notificationStatus.isEmpty { Text(model.notificationStatus).font(.caption) }
+            }
+            Section("Подключение") {
+                Text(model.companionBridge.status).font(.caption)
+                Text(model.connectionStatus).font(.caption)
+            }
+        }.navigationTitle("Ещё")
+            .task { await model.refreshNotificationPermission() }
+    }
+}
+
 private struct WatchHealthView: View {
     @Bindable var health: WatchHealth
     let state: WorkoutState
-    @State private var confirmStart = false
-    @State private var confirmClose = false
     var body: some View {
         ScrollView {
             VStack(spacing: 10) {
                 Text(health.status).font(.caption)
-                if !health.enabled {
-                    Button("Включить Apple Health") { Task { await health.authorize(); await health.reconcile(state) } }
-                    Text("Пульс и калории остаются на устройствах. Дневник работает и без доступа к здоровью.").font(.caption2)
-                }
-                if health.enabled, health.activeID == nil, state.workout.active {
-                    Button("Начать измерения") { confirmStart = true }
-                }
-                TimelineView(.periodic(from: .now, by: 1)) { context in
-                    if let date = health.pulseDate {
-                        Text("Измерение \(Int(max(0, context.date.timeIntervalSince(date)))) с назад").font(.caption2)
-                    }
-                    Text("Длительность: \(Int(health.elapsed / 60)) мин")
-                }
-                Text("Средний пульс: \(health.average.map { String(Int($0)) } ?? "—")")
-                Text("Максимальный: \(health.maximum.map { String(Int($0)) } ?? "—")")
-                Text("Активные ккал: \(health.calories.map { String(Int($0)) } ?? "—")")
-                if health.canPause { Button(health.paused ? "Продолжить тренировку" : "Пауза тренировки") { health.togglePause() } }
-                if health.needsRecovery { Button("Восстановить измерение") { Task { await health.recover() } }.disabled(health.busy) }
-                if health.canCloseUnrecoverable {
-                    Button("Закрыть прерванное измерение", role: .destructive) { confirmClose = true }.disabled(health.busy)
-                }
-                if !state.workout.active || health.canRetryFinish {
-                    Button("Повторить завершение HealthKit") { Task { await health.finish() } }.disabled(health.busy)
+                Text("Тренировки и измерения из TrainingLog не сохраняются в Apple Health. Аналитика на iPhone только читает доступные данные.").font(.caption2)
+                if health.needsRecovery {
+                    Button("Повторить закрытие прежнего измерения") {
+                        Task { await health.recover() }
+                    }.disabled(health.busy)
                 }
             }
-        }.navigationTitle("Apple Health")
-        .confirmationDialog("Системное измерение не восстановлено. Сохранение в Apple Health не подтверждено: часть измерений могла не сохраниться. Исходный журнал останется на часах, подходы и записи Apple Health не удалятся. Повторное измерение этой же тренировки не начнётся.", isPresented: $confirmClose, titleVisibility: .visible) {
-            Button("Закрыть без подтверждённой записи", role: .destructive) { Task { await health.closeUnrecoverable() } }
-            Button("Оставить для восстановления", role: .cancel) { }
-        }
-        .confirmationDialog("Убедитесь, что другая тренировка Apple Fitness или другого приложения завершена. Часы поддерживают только одну системную тренировку.", isPresented: $confirmStart, titleVisibility: .visible) {
-            Button("Другой тренировки нет — начать") { Task { await health.confirmStart(state) } }
-            Button("Без измерений", role: .cancel) { }
-        }
+        }.navigationTitle("Apple Health · чтение")
     }
 }
 
@@ -189,19 +181,19 @@ private struct SetCard: View {
             }
             Button("Готово") { Task { _ = await model.apply(.complete(location)) } }
                 .tint(.green).accessibilityIdentifier("completeSet")
-            Text(modeLabel).font(.caption2).foregroundStyle(.secondary)
-            NavigationLink("RIR / заметка") {
+            NavigationLink("Детали подхода") {
                 ScrollView {
                     VStack(spacing: 8) {
+                    Text(modeLabel).font(.caption2).foregroundStyle(.secondary)
                     field("RIR", "rir")
                     field("Заметка", "note")
+                    Button("Пропустить подход") { skipped = true }.font(.caption)
                     }
                 }
+                .confirmationDialog("Пропустить этот подход?", isPresented: $skipped, titleVisibility: .visible) {
+                    Button("Пропустить") { Task { _ = await model.apply(.skip(location)) } }
+                }
             }.font(.caption)
-            Button("Пропустить подход") { skipped = true }.font(.caption)
-        }
-        .confirmationDialog("Пропустить этот подход?", isPresented: $skipped, titleVisibility: .visible) {
-            Button("Пропустить") { Task { _ = await model.apply(.skip(location)) } }
         }
     }
     private func field(_ label: String, _ field: String) -> some View {

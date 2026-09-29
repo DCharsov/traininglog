@@ -117,10 +117,26 @@ private struct PhoneRootView: View {
                                 }
                             }.navigationTitle(day["name"].string ?? "Тренировка").navigationBarTitleDisplayMode(.inline)
                         } label: {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(day["name"].string ?? "Тренировка").font(.headline)
-                                Text("\(day["exercises"].array.count) упражнений").font(.subheadline).foregroundStyle(.secondary)
-                            }.padding(.vertical, 4)
+                            TimelineView(.periodic(from: .now, by: 60)) { context in
+                                let done = RecentTraining.lastDate(sessions: model.diary.sessions.map { $0.workout.json }, programID: program.phoneID, dayID: day.phoneID, now: context.date)
+                                HStack(spacing: 12) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(day["name"].string ?? "Тренировка").font(.headline)
+                                        Text("\(day["exercises"].array.count) упражнений").font(.subheadline).foregroundStyle(.secondary)
+                                        if let done {
+                                            Text("Выполнено · \(done.split(separator: "-").reversed().joined(separator: "."))")
+                                                .font(.caption.weight(.medium)).foregroundStyle(.green)
+                                            Text("За последние 7 дней").font(.caption2).foregroundStyle(.secondary)
+                                        }
+                                    }
+                                    Spacer(minLength: 4)
+                                    if done != nil {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .font(.title2).foregroundStyle(.green)
+                                            .accessibilityLabel("Выполнено за последние 7 дней")
+                                    }
+                                }.padding(.vertical, 4)
+                            }
                         }
                     }
                 }
